@@ -2,19 +2,15 @@ FROM python:3.11-slim
 
 # 设置工作目录
 WORKDIR /app
-ARG MIRROR
-ENV MIRROR=${MIRROR:-true}
-
-# 设置镜像源
-RUN if [ "${MIRROR}" == "true" ]; then \
-        sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources; \
-    fi
 
 # 安装系统依赖和Restic
-RUN apt-get update \
+RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources \
+    && apt-get update \
     && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
+    postgresql-client-common \
+    postgresql-client \
     bzip2 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
