@@ -100,6 +100,17 @@ function applyTheme() {
     themeIcon.className = themeSettings.currentTheme === 'dark' ? 
       'bi bi-moon-fill' : 'bi bi-sun-fill';
   }
+  
+  // Sync with global app state if it exists
+  if (typeof app !== 'undefined') {
+    app.darkMode = themeSettings.currentTheme === 'dark';
+  }
+  
+  // Dispatch a custom event for components that need to react to theme changes
+  const event = new CustomEvent('themeChanged', { 
+    detail: { theme: themeSettings.currentTheme }
+  });
+  document.dispatchEvent(event);
 }
 
 /**

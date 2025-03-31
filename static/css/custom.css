@@ -2,6 +2,76 @@
  * Custom styles for Resticly
  */
 
+/* Dark mode text color adjustments */
+[data-bs-theme="dark"] {
+  --bs-body-color: #e6e6e6;
+  --bs-body-color-rgb: 230, 230, 230;
+  --bs-tertiary-color: #a1a1a1;
+  --bs-tertiary-color-rgb: 161, 161, 161;
+  --bs-emphasis-color: #fff;
+  --bs-emphasis-color-rgb: 255, 255, 255;
+}
+
+/* Enhance table content visibility in dark mode */
+[data-bs-theme="dark"] .table {
+  --bs-table-color: #e6e6e6;
+  --bs-table-striped-color: #e6e6e6;
+  --bs-table-active-color: #e6e6e6;
+  --bs-table-hover-color: #fff;
+}
+
+/* Ensure form inputs have good contrast in dark mode */
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+  color: #e6e6e6;
+  background-color: #262626;
+  border-color: #495057;
+}
+
+/* Enhance card readability in dark mode */
+[data-bs-theme="dark"] .card {
+  --bs-card-color: #e6e6e6;
+  --bs-card-cap-color: #fff;
+}
+
+/* Make list group items readable in dark mode */
+[data-bs-theme="dark"] .list-group-item {
+  --bs-list-group-color: #e6e6e6;
+}
+
+/* Specific styles for repositories, backups, snapshots pages in dark mode */
+[data-bs-theme="dark"] .repository-card,
+[data-bs-theme="dark"] .backup-card,
+[data-bs-theme="dark"] .snapshot-card,
+[data-bs-theme="dark"] .scheduled-task-card {
+  --bs-card-color: #e6e6e6;
+}
+
+[data-bs-theme="dark"] .table td,
+[data-bs-theme="dark"] .table th {
+  color: #e6e6e6;
+}
+
+[data-bs-theme="dark"] .repository-details,
+[data-bs-theme="dark"] .backup-details,
+[data-bs-theme="dark"] .snapshot-details,
+[data-bs-theme="dark"] .scheduled-task-details {
+  color: #e6e6e6;
+}
+
+/* Ensure modals have good contrast */
+[data-bs-theme="dark"] .modal-content {
+  background-color: #212529;
+  color: #e6e6e6;
+}
+
+/* Fix input contrast in dark mode */
+[data-bs-theme="dark"] input::placeholder,
+[data-bs-theme="dark"] textarea::placeholder,
+[data-bs-theme="dark"] select {
+  color: #a1a1a1;
+}
+
 /* Basic layout adjustments */
 body {
   min-height: 100vh;

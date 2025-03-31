@@ -113,42 +113,14 @@ function translatePage() {
 
 /**
  * Initialize theme support
+ * Note: Actual implementation is in theme.js
  */
 function initializeTheme() {
-  // Set theme toggle to current state
-  const themeToggle = document.getElementById('themeToggle');
-  if (themeToggle) {
-    themeToggle.checked = app.darkMode;
-    themeToggle.addEventListener('change', (e) => {
-      toggleTheme(e.target.checked);
-    });
-  }
-  
-  // Apply initial theme
-  applyTheme();
-}
-
-/**
- * Toggle between light and dark theme
- * @param {boolean} darkMode - Whether to enable dark mode
- */
-function toggleTheme(darkMode) {
-  app.darkMode = darkMode;
-  localStorage.setItem('resticly_theme', darkMode ? 'dark' : 'light');
-  applyTheme();
-}
-
-/**
- * Apply the current theme to the document
- */
-function applyTheme() {
-  document.body.setAttribute('data-bs-theme', app.darkMode ? 'dark' : 'light');
-  
-  // Update theme toggle icon if it exists
-  const themeIcon = document.getElementById('themeIcon');
-  if (themeIcon) {
-    themeIcon.className = app.darkMode ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
-  }
+  // This is just a placeholder as the real implementation is in theme.js
+  // This function is called from initializeApp()
+  // We sync the app.darkMode state with the theme.js state
+  const savedTheme = localStorage.getItem('resticly_theme');
+  app.darkMode = savedTheme ? savedTheme === 'dark' : true;
 }
 
 /**
