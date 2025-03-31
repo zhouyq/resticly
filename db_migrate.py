@@ -6,10 +6,10 @@ from psycopg2 import sql
 def get_db_connection():
     """获取数据库连接"""
     conn = psycopg2.connect(
-        host=os.environ.get('PGHOST', 'localhost'),
-        database=os.environ.get('PGDATABASE', 'resticly'),
-        user=os.environ.get('PGUSER', 'resticly'),
-        password=os.environ.get('PGPASSWORD', 'resticly')
+        host=os.environ.get('POSTGRES_HOST', 'localhost'),
+        database=os.environ.get('POSTGRES_DB', 'resticly'),
+        user=os.environ.get('POSTGRES_USER', 'resticly'),
+        password=os.environ.get('POSTGRES_PASSWORD', 'resticly')
     )
     conn.autocommit = True
     return conn
