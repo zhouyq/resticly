@@ -99,6 +99,10 @@
   --bs-tertiary-color-rgb: 108, 117, 125;
   --bs-emphasis-color: #000;
   --bs-emphasis-color-rgb: 0, 0, 0;
+  --bs-primary-bg-subtle: #cfe2ff;
+  --bs-primary-border-subtle: #9ec5fe;
+  --bs-secondary-bg-subtle: #f8f9fa;
+  --bs-secondary-border-subtle: #e9ecef;
 }
 
 /* Navigation text color adjustments */
@@ -390,4 +394,47 @@ body, .navbar, .footer, .card, .main-content, .form-control, .form-select,
 button, a, .list-group-item, .badge, .alert, .modal-content, .dropdown-menu,
 .table, th, td, .sidebar, .theme-toggle-wrapper, .toast, table, input {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* Light mode specific button and card adjustments */
+[data-bs-theme="light"] .btn-outline-secondary {
+  color: #333;
+  border-color: #6c757d;
+}
+
+[data-bs-theme="light"] .btn-outline-secondary:hover {
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+[data-bs-theme="light"] .card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  color: #333;
+}
+
+[data-bs-theme="light"] .table-light {
+  --bs-table-color: #333333;
+  --bs-table-bg: #ffffff;
+  --bs-table-border-color: #dee2e6;
+  --bs-table-striped-bg: #f8f9fa;
+  --bs-table-striped-color: #333333;
+  --bs-table-hover-bg: #e9ecef;
+  --bs-table-hover-color: #333333;
+}
+
+/* Improve dropdown menus in light mode */
+[data-bs-theme="light"] .dropdown-menu {
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+}
+
+[data-bs-theme="light"] .dropdown-item {
+  color: #333;
+}
+
+[data-bs-theme="light"] .dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: #000;
 }

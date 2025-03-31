@@ -447,17 +447,43 @@ def get_snapshots():
         
         snapshots = query.order_by(Snapshot.created_at.desc()).all()
         
-        return jsonify([{
-            'id': snapshot.id,
-            'repository_id': snapshot.repository_id,
-            'repository_name': snapshot.repository.name,
-            'snapshot_id': snapshot.snapshot_id,
-            'created_at': snapshot.created_at.isoformat(),
-            'hostname': snapshot.hostname,
-            'paths': json.loads(snapshot.paths) if snapshot.paths else [],
-            'tags': json.loads(snapshot.tags) if snapshot.tags else [],
-            'size': snapshot.size
-        } for snapshot in snapshots])
+        result = []
+        for snapshot in snapshots:
+            try:
+                # 安全处理JSON解析，避免错误中断整个操作
+                paths = []
+                tags = []
+                
+                if snapshot.paths:
+                    try:
+                        paths = json.loads(snapshot.paths)
+                    except json.JSONDecodeError:
+                        paths = []
+                        
+                if snapshot.tags:
+                    try:
+                        tags = json.loads(snapshot.tags)
+                    except json.JSONDecodeError:
+                        tags = []
+                
+                snapshot_data = {
+                    'id': snapshot.id,
+                    'repository_id': snapshot.repository_id,
+                    'repository_name': snapshot.repository.name,
+                    'snapshot_id': snapshot.snapshot_id,
+                    'created_at': snapshot.created_at.isoformat(),
+                    'hostname': snapshot.hostname,
+                    'paths': paths,
+                    'tags': tags,
+                    'size': snapshot.size
+                }
+                result.append(snapshot_data)
+            except Exception as individual_error:
+                logger.warning(f"Error processing individual snapshot {snapshot.id}: {str(individual_error)}")
+                # 跳过有问题的快照，继续处理其他快照
+                continue
+        
+        return jsonify(result)
     except Exception as e:
         logger.error(f"Error fetching snapshots: {str(e)}")
         return jsonify({'error': str(e)}), 500
@@ -672,21 +698,41 @@ def get_scheduled_tasks():
     """API endpoint to get all scheduled tasks"""
     try:
         tasks = ScheduledTask.query.all()
-        return jsonify([{
-            'id': task.id,
-            'repository_id': task.repository_id,
-            'repository_name': task.repository.name,
-            'name': task.name,
-            'source_path': task.source_path,
-            'schedule_type': task.schedule_type,
-            'cron_expression': task.cron_expression,
-            'interval_seconds': task.interval_seconds,
-            'enabled': task.enabled,
-            'last_run': task.last_run.isoformat() if task.last_run else None,
-            'next_run': task.next_run.isoformat() if task.next_run else None,
-            'created_at': task.created_at.isoformat(),
-            'tags': json.loads(task.tags) if task.tags and task.tags.strip() else []
-        } for task in tasks])
+        result = []
+        
+        for task in tasks:
+            try:
+                # 安全处理JSON解析，避免错误中断整个操作
+                tags = []
+                
+                if task.tags and task.tags.strip():
+                    try:
+                        tags = json.loads(task.tags)
+                    except json.JSONDecodeError:
+                        tags = []
+                
+                task_data = {
+                    'id': task.id,
+                    'repository_id': task.repository_id,
+                    'repository_name': task.repository.name,
+                    'name': task.name,
+                    'source_path': task.source_path,
+                    'schedule_type': task.schedule_type,
+                    'cron_expression': task.cron_expression,
+                    'interval_seconds': task.interval_seconds,
+                    'enabled': task.enabled,
+                    'last_run': task.last_run.isoformat() if task.last_run else None,
+                    'next_run': task.next_run.isoformat() if task.next_run else None,
+                    'created_at': task.created_at.isoformat(),
+                    'tags': tags
+                }
+                result.append(task_data)
+            except Exception as individual_error:
+                logger.warning(f"Error processing individual task {task.id}: {str(individual_error)}")
+                # 跳过有问题的任务，继续处理其他任务
+                continue
+                
+        return jsonify(result)
     except Exception as e:
         logger.error(f"Error fetching scheduled tasks: {str(e)}")
         return jsonify({'error': str(e)}), 500

@@ -32,6 +32,29 @@ const themeSettings = {
  * Initialize theme functionality
  */
 function initializeTheme() {
+  // 为文档根添加CSS自定义属性（变量），以便在CSS中使用
+  const root = document.documentElement;
+  
+  // 设置深色主题变量
+  root.style.setProperty('--resticly-dark-bg', '#121212');
+  root.style.setProperty('--resticly-dark-content-bg', '#1e1e1e');
+  root.style.setProperty('--resticly-dark-card-bg', '#2d2d2d');
+  root.style.setProperty('--resticly-dark-card-header-bg', '#212529');
+  root.style.setProperty('--resticly-dark-input-bg', '#262626');
+  root.style.setProperty('--resticly-dark-border', '#444');
+  root.style.setProperty('--resticly-dark-text', '#e6e6e6');
+  root.style.setProperty('--resticly-dark-text-secondary', 'rgba(255, 255, 255, 0.7)');
+  
+  // 设置浅色主题变量
+  root.style.setProperty('--resticly-light-bg', '#ffffff');
+  root.style.setProperty('--resticly-light-content-bg', '#f8f9fa');
+  root.style.setProperty('--resticly-light-card-bg', '#ffffff');
+  root.style.setProperty('--resticly-light-card-header-bg', '#f8f9fa');
+  root.style.setProperty('--resticly-light-input-bg', '#ffffff');
+  root.style.setProperty('--resticly-light-border', '#dee2e6');
+  root.style.setProperty('--resticly-light-text', '#333333');
+  root.style.setProperty('--resticly-light-text-secondary', 'rgba(0, 0, 0, 0.7)');
+  
   // Load theme preference from localStorage
   const savedTheme = localStorage.getItem('resticly_theme');
   if (savedTheme) {
@@ -170,6 +193,20 @@ function applyTheme() {
     } else {
       card.style.borderColor = '#dee2e6';
     }
+    
+    // Update card-header elements inside this card
+    const cardHeaders = card.querySelectorAll('.card-header');
+    cardHeaders.forEach(header => {
+      header.style.backgroundColor = isDarkTheme ? '#212529' : '#f8f9fa';
+      header.style.borderColor = isDarkTheme ? '#444' : '#dee2e6';
+      header.style.color = isDarkTheme ? '#e6e6e6' : '#333333';
+    });
+    
+    // Update text colors in card bodies
+    const cardTexts = card.querySelectorAll('.card-title, .card-text, .card-body');
+    cardTexts.forEach(text => {
+      text.style.color = isDarkTheme ? '#e6e6e6' : '#333333';
+    });
   });
   
   // Update inputs
@@ -184,6 +221,57 @@ function applyTheme() {
       input.style.borderColor = '#ced4da';
       input.style.color = '#333333';
     }
+  });
+  
+  // Update tables for better contrast
+  const tables = document.querySelectorAll('.table');
+  tables.forEach(table => {
+    if (isDarkTheme) {
+      table.classList.add('table-dark');
+      table.classList.remove('table-light');
+    } else {
+      table.classList.add('table-light');
+      table.classList.remove('table-dark');
+    }
+    
+    // Update table cells and headers
+    const tableCells = table.querySelectorAll('td, th');
+    tableCells.forEach(cell => {
+      cell.style.color = isDarkTheme ? '#e6e6e6' : '#333333';
+      cell.style.borderColor = isDarkTheme ? '#444' : '#dee2e6';
+    });
+  });
+  
+  // Update buttons for better visibility
+  const buttons = document.querySelectorAll('.btn');
+  buttons.forEach(button => {
+    // Skip buttons that already have specific colors
+    if (!button.classList.contains('btn-primary') && 
+        !button.classList.contains('btn-success') && 
+        !button.classList.contains('btn-danger') && 
+        !button.classList.contains('btn-warning') && 
+        !button.classList.contains('btn-info')) {
+      
+      // For outline buttons in light mode, ensure good contrast
+      if (button.classList.contains('btn-outline-secondary') && !isDarkTheme) {
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-outline-dark');
+      }
+      
+      // For outline buttons in dark mode
+      if (button.classList.contains('btn-outline-dark') && isDarkTheme) {
+        button.classList.remove('btn-outline-dark');
+        button.classList.add('btn-outline-secondary');
+      }
+    }
+  });
+  
+  // Update list groups
+  const listGroups = document.querySelectorAll('.list-group-item');
+  listGroups.forEach(item => {
+    item.style.backgroundColor = isDarkTheme ? '#2d2d2d' : '#ffffff';
+    item.style.borderColor = isDarkTheme ? '#444' : '#dee2e6';
+    item.style.color = isDarkTheme ? '#e6e6e6' : '#333333';
   });
   
   // Sync with global app state if it exists
@@ -222,6 +310,29 @@ document.addEventListener('DOMContentLoaded', initializeTheme);
 
 // Execute this immediately to prevent flash of unstyled content (FOUC)
 (function() {
+  // 为文档根添加CSS自定义属性（变量），以便在CSS中使用
+  const root = document.documentElement;
+  
+  // 设置深色主题变量
+  root.style.setProperty('--resticly-dark-bg', '#121212');
+  root.style.setProperty('--resticly-dark-content-bg', '#1e1e1e');
+  root.style.setProperty('--resticly-dark-card-bg', '#2d2d2d');
+  root.style.setProperty('--resticly-dark-card-header-bg', '#212529');
+  root.style.setProperty('--resticly-dark-input-bg', '#262626');
+  root.style.setProperty('--resticly-dark-border', '#444');
+  root.style.setProperty('--resticly-dark-text', '#e6e6e6');
+  root.style.setProperty('--resticly-dark-text-secondary', 'rgba(255, 255, 255, 0.7)');
+  
+  // 设置浅色主题变量
+  root.style.setProperty('--resticly-light-bg', '#ffffff');
+  root.style.setProperty('--resticly-light-content-bg', '#f8f9fa');
+  root.style.setProperty('--resticly-light-card-bg', '#ffffff');
+  root.style.setProperty('--resticly-light-card-header-bg', '#f8f9fa');
+  root.style.setProperty('--resticly-light-input-bg', '#ffffff');
+  root.style.setProperty('--resticly-light-border', '#dee2e6');
+  root.style.setProperty('--resticly-light-text', '#333333');
+  root.style.setProperty('--resticly-light-text-secondary', 'rgba(0, 0, 0, 0.7)');
+  
   // Get theme from localStorage
   const savedTheme = localStorage.getItem('resticly_theme');
   const theme = savedTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -308,6 +419,20 @@ document.addEventListener('DOMContentLoaded', initializeTheme);
       } else {
         card.style.borderColor = '#dee2e6';
       }
+      
+      // Update card-header elements inside this card
+      const cardHeaders = card.querySelectorAll('.card-header');
+      cardHeaders.forEach(header => {
+        header.style.backgroundColor = isDarkTheme ? '#212529' : '#f8f9fa';
+        header.style.borderColor = isDarkTheme ? '#444' : '#dee2e6';
+        header.style.color = isDarkTheme ? '#e6e6e6' : '#333333';
+      });
+      
+      // Update text colors in card bodies
+      const cardTexts = card.querySelectorAll('.card-title, .card-text, .card-body');
+      cardTexts.forEach(text => {
+        text.style.color = isDarkTheme ? '#e6e6e6' : '#333333';
+      });
     });
     
     // Update inputs
@@ -322,6 +447,57 @@ document.addEventListener('DOMContentLoaded', initializeTheme);
         input.style.borderColor = '#ced4da';
         input.style.color = '#333333';
       }
+    });
+    
+    // Update tables for better contrast
+    const tables = document.querySelectorAll('.table');
+    tables.forEach(table => {
+      if (isDarkTheme) {
+        table.classList.add('table-dark');
+        table.classList.remove('table-light');
+      } else {
+        table.classList.add('table-light');
+        table.classList.remove('table-dark');
+      }
+      
+      // Update table cells and headers
+      const tableCells = table.querySelectorAll('td, th');
+      tableCells.forEach(cell => {
+        cell.style.color = isDarkTheme ? '#e6e6e6' : '#333333';
+        cell.style.borderColor = isDarkTheme ? '#444' : '#dee2e6';
+      });
+    });
+    
+    // Update buttons for better visibility
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+      // Skip buttons that already have specific colors
+      if (!button.classList.contains('btn-primary') && 
+          !button.classList.contains('btn-success') && 
+          !button.classList.contains('btn-danger') && 
+          !button.classList.contains('btn-warning') && 
+          !button.classList.contains('btn-info')) {
+        
+        // For outline buttons in light mode, ensure good contrast
+        if (button.classList.contains('btn-outline-secondary') && !isDarkTheme) {
+          button.classList.remove('btn-outline-secondary');
+          button.classList.add('btn-outline-dark');
+        }
+        
+        // For outline buttons in dark mode
+        if (button.classList.contains('btn-outline-dark') && isDarkTheme) {
+          button.classList.remove('btn-outline-dark');
+          button.classList.add('btn-outline-secondary');
+        }
+      }
+    });
+    
+    // Update list groups
+    const listGroups = document.querySelectorAll('.list-group-item');
+    listGroups.forEach(item => {
+      item.style.backgroundColor = isDarkTheme ? '#2d2d2d' : '#ffffff';
+      item.style.borderColor = isDarkTheme ? '#444' : '#dee2e6';
+      item.style.color = isDarkTheme ? '#e6e6e6' : '#333333';
     });
   });
 })();
