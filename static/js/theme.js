@@ -104,6 +104,19 @@ function applyTheme() {
   const themeIcon = document.getElementById('themeIcon');
   if (themeIcon) {
     themeIcon.className = isDarkTheme ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
+    themeIcon.style.color = isDarkTheme ? '#ffffff' : '#000000';
+  }
+  
+  // Update language dropdown button
+  const languageDropdown = document.getElementById('languageDropdown');
+  if (languageDropdown) {
+    if (isDarkTheme) {
+      languageDropdown.classList.remove('btn-outline-dark');
+      languageDropdown.classList.add('btn-outline-secondary');
+    } else {
+      languageDropdown.classList.remove('btn-outline-secondary');
+      languageDropdown.classList.add('btn-outline-dark');
+    }
   }
   
   // Update the body background color
@@ -116,12 +129,28 @@ function applyTheme() {
     mainContent.style.backgroundColor = isDarkTheme ? '#1e1e1e' : '#f8f9fa';
   }
   
-  // Update navbar classes
+  // Update navbar classes and ensure proper text contrast
   const navbar = document.querySelector('.navbar');
   if (navbar) {
+    // First remove any theme-specific classes
+    navbar.classList.remove('navbar-dark', 'navbar-light');
+    // Then add the appropriate ones
+    navbar.classList.add(isDarkTheme ? 'navbar-dark' : 'navbar-light');
     navbar.classList.add('bg-body-tertiary');
+    
     // Add additional custom background colors for better contrast
     navbar.style.backgroundColor = isDarkTheme ? '#212529' : '#f8f9fa';
+    
+    // Ensure proper text colors for all navbar elements
+    const navLinks = navbar.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+      link.style.color = isDarkTheme ? 'rgba(255, 255, 255, 0.85)' : 'rgba(0, 0, 0, 0.85)';
+    });
+    
+    const navbarBrand = navbar.querySelector('.navbar-brand');
+    if (navbarBrand) {
+      navbarBrand.style.color = isDarkTheme ? '#ffffff' : '#000000';
+    }
   }
   
   // Update footer classes
@@ -204,6 +233,19 @@ document.addEventListener('DOMContentLoaded', initializeTheme);
   const themeIcon = document.getElementById('themeIcon');
   if (themeIcon) {
     themeIcon.className = theme === 'dark' ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
+    themeIcon.style.color = theme === 'dark' ? '#ffffff' : '#000000';
+  }
+  
+  // Update language dropdown button
+  const languageDropdown = document.getElementById('languageDropdown');
+  if (languageDropdown) {
+    if (theme === 'dark') {
+      languageDropdown.classList.remove('btn-outline-dark');
+      languageDropdown.classList.add('btn-outline-secondary');
+    } else {
+      languageDropdown.classList.remove('btn-outline-secondary');
+      languageDropdown.classList.add('btn-outline-dark');
+    }
   }
 
   // Set theme setting for later use
@@ -225,12 +267,28 @@ document.addEventListener('DOMContentLoaded', initializeTheme);
       mainContent.style.backgroundColor = isDarkTheme ? '#1e1e1e' : '#f8f9fa';
     }
     
-    // Update navbar classes
+    // Update navbar classes and ensure proper text contrast
     const navbar = document.querySelector('.navbar');
     if (navbar) {
+      // First remove any theme-specific classes
+      navbar.classList.remove('navbar-dark', 'navbar-light');
+      // Then add the appropriate ones
+      navbar.classList.add(isDarkTheme ? 'navbar-dark' : 'navbar-light');
       navbar.classList.add('bg-body-tertiary');
+      
       // Add additional custom background colors for better contrast
       navbar.style.backgroundColor = isDarkTheme ? '#212529' : '#f8f9fa';
+      
+      // Ensure proper text colors for all navbar elements
+      const navLinks = navbar.querySelectorAll('.nav-link');
+      navLinks.forEach(link => {
+        link.style.color = isDarkTheme ? 'rgba(255, 255, 255, 0.85)' : 'rgba(0, 0, 0, 0.85)';
+      });
+      
+      const navbarBrand = navbar.querySelector('.navbar-brand');
+      if (navbarBrand) {
+        navbarBrand.style.color = isDarkTheme ? '#ffffff' : '#000000';
+      }
     }
     
     // Update footer classes

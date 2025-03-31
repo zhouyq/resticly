@@ -294,6 +294,30 @@ body {
   margin-right: 10px;
 }
 
+/* Enhanced theme toggle styling */
+.form-check-input[type="checkbox"]#themeToggle {
+  background-color: #6c757d;
+  border-color: #495057;
+}
+
+[data-bs-theme="light"] .form-check-input[type="checkbox"]#themeToggle {
+  background-color: #adb5bd;
+  border-color: #6c757d;
+}
+
+.form-check-input[type="checkbox"]#themeToggle:checked {
+  background-color: #0d6efd;
+  border-color: #0a58ca;
+}
+
+[data-bs-theme="light"] .form-check-label[for="themeToggle"] {
+  color: #000;
+}
+
+[data-bs-theme="dark"] .form-check-label[for="themeToggle"] {
+  color: #fff;
+}
+
 /* Table adjustments */
 .table th {
   font-weight: 600;
