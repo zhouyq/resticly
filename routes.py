@@ -685,7 +685,7 @@ def get_scheduled_tasks():
             'last_run': task.last_run.isoformat() if task.last_run else None,
             'next_run': task.next_run.isoformat() if task.next_run else None,
             'created_at': task.created_at.isoformat(),
-            'tags': json.loads(task.tags) if task.tags else []
+            'tags': json.loads(task.tags) if task.tags and task.tags.strip() else []
         } for task in tasks])
     except Exception as e:
         logger.error(f"Error fetching scheduled tasks: {str(e)}")
@@ -727,7 +727,7 @@ def create_scheduled_task():
             cron_expression=data.get('cron_expression'),
             interval_seconds=data.get('interval_seconds'),
             enabled=data.get('enabled', True),
-            tags=json.dumps(data.get('tags', []))
+            tags=json.dumps(data.get('tags', [])) if data.get('tags') is not None else None
         )
         
         db.session.add(task)
@@ -784,7 +784,7 @@ def update_scheduled_task(task_id):
                 task.cron_expression = None
         
         if 'tags' in data:
-            task.tags = json.dumps(data['tags'])
+            task.tags = json.dumps(data['tags']) if data['tags'] is not None else None
         
         db.session.commit()
         
