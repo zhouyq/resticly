@@ -35,8 +35,15 @@ COPY . .
 ENV FLASK_APP=main.py
 ENV PYTHONUNBUFFERED=1
 
+# 确保启动脚本可执行
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # 暴露端口
 EXPOSE 5000
+
+# 使用启动脚本
+ENTRYPOINT ["/docker-entrypoint.sh"]
 
 # 启动命令
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "main:app"]

@@ -28,6 +28,10 @@ services:
     environment:
       - DATABASE_URL=postgresql://resticly:resticly@db/resticly
       - SESSION_SECRET=change_this_to_a_secure_random_string
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=resticly
+      - POSTGRES_USER=resticly
+      - POSTGRES_PASSWORD=resticly
     volumes:
       # 用于持久化备份数据（可根据需要修改）
       - restic_data:/backup
