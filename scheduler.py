@@ -85,8 +85,21 @@ def run_backup_task(task_id):
         db.session.add(backup)
         db.session.commit()
         
-        # Run the backup
-        restic = ResticWrapper(repository.location, repository.password)
+        # Run the backup with appropriate repository type
+        if repository.repo_type == 'rest-server':
+            restic = ResticWrapper(
+                repository.location, 
+                repository.password, 
+                repo_type='rest-server',
+                rest_user=repository.rest_user,
+                rest_pass=repository.rest_pass
+            )
+        else:
+            restic = ResticWrapper(
+                repository.location, 
+                repository.password, 
+                repo_type=repository.repo_type
+            )
         tags = json.loads(task.tags) if task.tags else []
         success, result = restic.create_backup(task.source_path, tags)
         

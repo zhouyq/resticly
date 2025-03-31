@@ -10,10 +10,22 @@ logger = logging.getLogger(__name__)
 class ResticWrapper:
     """Wrapper for Restic command-line operations"""
     
-    def __init__(self, repository_path, password):
-        """Initialize with repository path and password"""
+    def __init__(self, repository_path, password, repo_type='local', rest_user=None, rest_pass=None):
+        """
+        Initialize with repository path and password
+        
+        Args:
+            repository_path (str): Path to the repository or URL for REST server
+            password (str): Repository password for encryption
+            repo_type (str): Repository type ('local', 'rest-server', etc.)
+            rest_user (str, optional): Username for REST server authentication
+            rest_pass (str, optional): Password for REST server authentication
+        """
         self.repository_path = repository_path
         self.password = password
+        self.repo_type = repo_type
+        self.rest_user = rest_user
+        self.rest_pass = rest_pass
     
     def _execute_command(self, command, env=None):
         """
@@ -29,7 +41,20 @@ class ResticWrapper:
         try:
             # Prepare environment
             command_env = os.environ.copy()
-            command_env['RESTIC_REPOSITORY'] = self.repository_path
+            
+            # Set repository path based on type
+            if self.repo_type == 'rest-server':
+                # For REST server, the format is 'rest:https://hostname:8000/'
+                command_env['RESTIC_REPOSITORY'] = f'rest:{self.repository_path}'
+                
+                # Set REST server credentials if provided
+                if self.rest_user and self.rest_pass:
+                    command_env['RESTIC_REST_USER'] = self.rest_user
+                    command_env['RESTIC_REST_PASS'] = self.rest_pass
+            else:
+                # For local or other repository types
+                command_env['RESTIC_REPOSITORY'] = self.repository_path
+            
             command_env['RESTIC_PASSWORD'] = self.password
             
             # Add additional environment variables

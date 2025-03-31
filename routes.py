@@ -60,10 +60,12 @@ def get_repositories():
         return jsonify([{
             'id': repo.id,
             'name': repo.name,
+            'repo_type': repo.repo_type,
             'location': repo.location,
             'created_at': repo.created_at.isoformat(),
             'last_check': repo.last_check.isoformat() if repo.last_check else None,
-            'status': repo.status
+            'status': repo.status,
+            'rest_user': repo.rest_user if repo.repo_type == 'rest-server' else None
         } for repo in repositories])
     except Exception as e:
         logger.error(f"Error fetching repositories: {str(e)}")
@@ -76,7 +78,7 @@ def create_repository():
         data = request.json
         
         # Validate required fields
-        required_fields = ['name', 'location', 'password']
+        required_fields = ['name', 'location', 'password', 'repo_type']
         for field in required_fields:
             if field not in data or not data[field]:
                 return jsonify({'error': f'Missing required field: {field}'}), 400
@@ -86,8 +88,29 @@ def create_repository():
         if existing:
             return jsonify({'error': 'Repository with this name already exists'}), 400
         
+        # Validate repo_type
+        valid_repo_types = ['local', 'rest-server', 'sftp', 's3']
+        if data['repo_type'] not in valid_repo_types:
+            return jsonify({'error': f'Invalid repository type. Must be one of: {", ".join(valid_repo_types)}'}), 400
+            
+        # For REST server, validate required fields
+        if data['repo_type'] == 'rest-server':
+            # REST URL should be in the format https://hostname:8000/
+            if not (data['location'].startswith('http://') or data['location'].startswith('https://')):
+                return jsonify({'error': 'REST server URL must start with http:// or https://'}), 400
+        
         # Initialize repository using Restic
-        restic = ResticWrapper(data['location'], data['password'])
+        if data['repo_type'] == 'rest-server':
+            restic = ResticWrapper(
+                data['location'], 
+                data['password'], 
+                repo_type='rest-server',
+                rest_user=data.get('rest_user'),
+                rest_pass=data.get('rest_pass')
+            )
+        else:
+            restic = ResticWrapper(data['location'], data['password'], repo_type=data['repo_type'])
+            
         success, message = restic.init_repository()
         
         if not success:
@@ -96,8 +119,11 @@ def create_repository():
         # Create repository in database
         repository = Repository(
             name=data['name'],
+            repo_type=data['repo_type'],
             location=data['location'],
             password=data['password'],
+            rest_user=data.get('rest_user'),
+            rest_pass=data.get('rest_pass'),
             status='ok',
             last_check=datetime.utcnow()
         )
@@ -108,9 +134,11 @@ def create_repository():
         return jsonify({
             'id': repository.id,
             'name': repository.name,
+            'repo_type': repository.repo_type,
             'location': repository.location,
             'created_at': repository.created_at.isoformat(),
-            'status': repository.status
+            'status': repository.status,
+            'rest_user': repository.rest_user if repository.repo_type == 'rest-server' else None
         }), 201
     except Exception as e:
         db.session.rollback()
@@ -128,10 +156,12 @@ def get_repository(repo_id):
         return jsonify({
             'id': repository.id,
             'name': repository.name,
+            'repo_type': repository.repo_type,
             'location': repository.location,
             'created_at': repository.created_at.isoformat(),
             'last_check': repository.last_check.isoformat() if repository.last_check else None,
-            'status': repository.status
+            'status': repository.status,
+            'rest_user': repository.rest_user if repository.repo_type == 'rest-server' else None
         })
     except Exception as e:
         logger.error(f"Error fetching repository: {str(e)}")
@@ -145,7 +175,22 @@ def check_repository(repo_id):
         if not repository:
             return jsonify({'error': 'Repository not found'}), 404
         
-        restic = ResticWrapper(repository.location, repository.password)
+        # Create ResticWrapper with appropriate repository type
+        if repository.repo_type == 'rest-server':
+            restic = ResticWrapper(
+                repository.location, 
+                repository.password, 
+                repo_type='rest-server',
+                rest_user=repository.rest_user,
+                rest_pass=repository.rest_pass
+            )
+        else:
+            restic = ResticWrapper(
+                repository.location, 
+                repository.password, 
+                repo_type=repository.repo_type
+            )
+            
         success, message = restic.check_repository()
         
         repository.last_check = datetime.utcnow()
@@ -241,7 +286,21 @@ def create_backup():
         from threading import Thread
         def run_backup():
             try:
-                restic = ResticWrapper(repository.location, repository.password)
+                # Create ResticWrapper with appropriate repository type
+                if repository.repo_type == 'rest-server':
+                    restic = ResticWrapper(
+                        repository.location, 
+                        repository.password, 
+                        repo_type='rest-server',
+                        rest_user=repository.rest_user,
+                        rest_pass=repository.rest_pass
+                    )
+                else:
+                    restic = ResticWrapper(
+                        repository.location, 
+                        repository.password, 
+                        repo_type=repository.repo_type
+                    )
                 success, result = restic.create_backup(data['source_path'])
                 
                 backup.end_time = datetime.utcnow()
@@ -362,7 +421,21 @@ def sync_snapshots(repo_id):
         if not repository:
             return jsonify({'error': 'Repository not found'}), 404
         
-        restic = ResticWrapper(repository.location, repository.password)
+        # Create ResticWrapper with appropriate repository type
+        if repository.repo_type == 'rest-server':
+            restic = ResticWrapper(
+                repository.location, 
+                repository.password, 
+                repo_type='rest-server',
+                rest_user=repository.rest_user,
+                rest_pass=repository.rest_pass
+            )
+        else:
+            restic = ResticWrapper(
+                repository.location, 
+                repository.password, 
+                repo_type=repository.repo_type
+            )
         success, snapshots_data = restic.list_snapshots()
         
         if not success:

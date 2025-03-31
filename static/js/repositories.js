@@ -49,7 +49,10 @@ function renderRepositories(repositories) {
   tableBody.innerHTML = repositories.map(repo => `
     <tr data-repo-id="${repo.id}">
       <td>${repo.name}</td>
-      <td><small class="text-muted">${repo.location}</small></td>
+      <td>
+        <span class="badge bg-secondary me-1">${repo.repo_type}</span>
+        <small class="text-muted">${repo.location}</small>
+      </td>
       <td>${formatDate(repo.created_at)}</td>
       <td>${formatDate(repo.last_check)}</td>
       <td>${createStatusBadge(repo.status)}</td>
@@ -95,6 +98,17 @@ function setupRepositoryFormHandlers() {
     });
   }
   
+  // Setup repository type change handler
+  const typeSelect = document.getElementById('repositoryType');
+  if (typeSelect) {
+    typeSelect.addEventListener('change', () => {
+      toggleRestServerFields(typeSelect.value === 'rest-server');
+    });
+    
+    // Initialize the visibility based on the default selection
+    toggleRestServerFields(typeSelect.value === 'rest-server');
+  }
+  
   // Setup repository buttons
   const newRepoButton = document.getElementById('newRepositoryButton');
   if (newRepoButton) {
@@ -106,33 +120,88 @@ function setupRepositoryFormHandlers() {
 }
 
 /**
+ * Toggle visibility of REST server specific fields
+ * @param {boolean} show - Whether to show the fields
+ */
+function toggleRestServerFields(show) {
+  const restServerFields = document.getElementById('restServerFields');
+  if (restServerFields) {
+    restServerFields.style.display = show ? 'block' : 'none';
+  }
+  
+  // Update location field placeholder based on type
+  const locationInput = document.getElementById('repositoryLocation');
+  if (locationInput) {
+    locationInput.placeholder = show ? 
+      'https://your-rest-server:8000/' : 
+      '/path/to/repository';
+  }
+  
+  // Update help text
+  const locationHelpText = document.getElementById('locationHelpText');
+  if (locationHelpText) {
+    if (show) {
+      locationHelpText.innerHTML = 'Example: <code>https://rest-server.example.com:8000/</code>';
+    } else {
+      locationHelpText.innerHTML = 'Example: <code>/path/to/repo</code>';
+    }
+  }
+}
+
+/**
  * Create a new repository
  */
 function createRepository() {
   const nameInput = document.getElementById('repositoryName');
+  const typeSelect = document.getElementById('repositoryType');
   const locationInput = document.getElementById('repositoryLocation');
   const passwordInput = document.getElementById('repositoryPassword');
+  const restUserInput = document.getElementById('restServerUsername');
+  const restPassInput = document.getElementById('restServerPassword');
   
-  if (!nameInput || !locationInput || !passwordInput) return;
+  if (!nameInput || !typeSelect || !locationInput || !passwordInput) return;
   
   const name = nameInput.value.trim();
+  const repo_type = typeSelect.value;
   const location = locationInput.value.trim();
   const password = passwordInput.value;
   
-  if (!name || !location || !password) {
+  if (!name || !repo_type || !location || !password) {
     showToast('Please fill in all required fields', 'warning');
     return;
+  }
+  
+  // For REST server, validate additional fields
+  if (repo_type === 'rest-server') {
+    if (!location.startsWith('http://') && !location.startsWith('https://')) {
+      showToast('REST server URL must start with http:// or https://', 'warning');
+      return;
+    }
+  }
+  
+  const repoData = {
+    name: name,
+    repo_type: repo_type,
+    location: location,
+    password: password
+  };
+  
+  // Add REST server authentication if provided
+  if (repo_type === 'rest-server' && restUserInput && restPassInput) {
+    const rest_user = restUserInput.value.trim();
+    const rest_pass = restPassInput.value;
+    
+    if (rest_user && rest_pass) {
+      repoData.rest_user = rest_user;
+      repoData.rest_pass = rest_pass;
+    }
   }
   
   showLoading();
   
   apiRequest('/api/repositories', {
     method: 'POST',
-    body: JSON.stringify({
-      name: name,
-      location: location,
-      password: password
-    })
+    body: JSON.stringify(repoData)
   })
     .then(result => {
       showToast('Repository created successfully', 'success');
@@ -141,6 +210,16 @@ function createRepository() {
       nameInput.value = '';
       locationInput.value = '';
       passwordInput.value = '';
+      
+      // Reset type to default and reset REST server fields
+      if (typeSelect) {
+        typeSelect.value = 'local';
+        toggleRestServerFields(false);
+      }
+      
+      // Reset REST server fields if they exist
+      if (restUserInput) restUserInput.value = '';
+      if (restPassInput) restPassInput.value = '';
       
       bootstrap.Modal.getInstance(document.getElementById('newRepositoryModal')).hide();
       

@@ -5,8 +5,11 @@ class Repository(db.Model):
     """Model for Restic repositories"""
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    repo_type = db.Column(db.String(50), default='local')  # local, rest-server, sftp, s3, etc.
     location = db.Column(db.String(500), nullable=False)
     password = db.Column(db.String(256), nullable=False)  # Password used for repository encryption
+    rest_user = db.Column(db.String(100), nullable=True)  # REST server username (if applicable)
+    rest_pass = db.Column(db.String(256), nullable=True)  # REST server password (if applicable)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_check = db.Column(db.DateTime, nullable=True)
     status = db.Column(db.String(50), default='unknown')  # unknown, ok, error
