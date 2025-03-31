@@ -3,6 +3,11 @@
  * Contains global functionality used across the application
  */
 
+// Global theme settings used by theme.js
+const themeSettings = {
+  currentTheme: 'dark'  // Default theme
+};
+
 // Global application state
 const app = {
   currentLanguage: 'en',
@@ -120,7 +125,11 @@ function initializeTheme() {
   // This function is called from initializeApp()
   // We sync the app.darkMode state with the theme.js state
   const savedTheme = localStorage.getItem('resticly_theme');
-  app.darkMode = savedTheme ? savedTheme === 'dark' : true;
+  const theme = savedTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  
+  // Set both app.darkMode and themeSettings.currentTheme for consistency
+  app.darkMode = theme === 'dark';
+  themeSettings.currentTheme = theme;
 }
 
 /**
@@ -158,6 +167,12 @@ function setupEventHandlers() {
         dropdown.classList.remove('show');
       });
     }
+  });
+  
+  // Listen for theme changes
+  document.addEventListener('themeChanged', (e) => {
+    // Update app.darkMode when theme changes
+    app.darkMode = e.detail.theme === 'dark';
   });
 }
 

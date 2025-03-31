@@ -1,5 +1,6 @@
 /**
  * Custom styles for Resticly
+ * Includes styles for both light and dark themes
  */
 
 /* Dark mode text color adjustments */
@@ -70,6 +71,86 @@
 [data-bs-theme="dark"] textarea::placeholder,
 [data-bs-theme="dark"] select {
   color: #a1a1a1;
+}
+
+/* Navbar and footer adjustments for theme switching */
+.navbar-dark {
+  background-color: #212529 !important;
+}
+
+.navbar-light {
+  background-color: #f8f9fa !important;
+}
+
+/* Footer theme adjustment */
+[data-bs-theme="light"] .footer {
+  background-color: #f8f9fa !important;
+}
+
+[data-bs-theme="dark"] .footer {
+  background-color: #212529 !important;
+}
+
+/* Light mode text color adjustments */
+[data-bs-theme="light"] {
+  --bs-body-color: #333333;
+  --bs-body-color-rgb: 51, 51, 51;
+  --bs-tertiary-color: #6c757d;
+  --bs-tertiary-color-rgb: 108, 117, 125;
+  --bs-emphasis-color: #000;
+  --bs-emphasis-color-rgb: 0, 0, 0;
+}
+
+/* Navigation text color adjustments */
+[data-bs-theme="light"] .navbar {
+  --bs-navbar-color: rgba(0, 0, 0, 0.65);
+  --bs-navbar-hover-color: rgba(0, 0, 0, 0.8);
+  --bs-navbar-active-color: rgba(0, 0, 0, 0.9);
+}
+
+[data-bs-theme="light"] .navbar-brand,
+[data-bs-theme="light"] .navbar-nav .nav-link {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+[data-bs-theme="light"] .navbar-nav .nav-link.active {
+  color: rgba(0, 0, 0, 1);
+  font-weight: 500;
+}
+
+/* Ensure form inputs have good contrast in light mode */
+[data-bs-theme="light"] .form-control,
+[data-bs-theme="light"] .form-select {
+  color: #333333;
+  background-color: #ffffff;
+  border-color: #ced4da;
+}
+
+/* Enhance card readability in light mode */
+[data-bs-theme="light"] .card {
+  --bs-card-color: #333333;
+  --bs-card-cap-color: #000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Make text readable in light mode for specific components */
+[data-bs-theme="light"] .text-muted {
+  color: #6c757d !important;
+}
+
+/* Fix footer text color in light mode */
+[data-bs-theme="light"] .footer .text-muted {
+  color: #6c757d !important;
+}
+
+/* Fix footer links in light mode */
+[data-bs-theme="light"] .footer a.text-muted {
+  color: #6c757d !important;
+}
+
+[data-bs-theme="light"] .footer a.text-muted:hover {
+  color: #5a6268 !important;
+  text-decoration: underline !important;
 }
 
 /* Basic layout adjustments */

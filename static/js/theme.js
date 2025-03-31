@@ -50,11 +50,11 @@ function initializeTheme() {
   if (themeToggle) {
     themeToggle.checked = themeSettings.currentTheme === 'dark';
     
+    // Remove any existing listeners
+    themeToggle.removeEventListener('change', toggleTheme);
+    
     // Add change event listener
-    themeToggle.addEventListener('change', (e) => {
-      const newTheme = e.target.checked ? 'dark' : 'light';
-      setTheme(newTheme);
-    });
+    themeToggle.addEventListener('change', toggleTheme);
   }
   
   // Set initial theme
@@ -92,18 +92,44 @@ function setTheme(theme) {
  * Apply the current theme to the document
  */
 function applyTheme() {
+  const isDarkTheme = themeSettings.currentTheme === 'dark';
+  
+  // Set the document theme
   document.body.setAttribute('data-bs-theme', themeSettings.currentTheme);
   
   // Update theme toggle icon if it exists
   const themeIcon = document.getElementById('themeIcon');
   if (themeIcon) {
-    themeIcon.className = themeSettings.currentTheme === 'dark' ? 
-      'bi bi-moon-fill' : 'bi bi-sun-fill';
+    themeIcon.className = isDarkTheme ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
+  }
+  
+  // Update navbar classes
+  const navbar = document.querySelector('.navbar');
+  if (navbar) {
+    if (isDarkTheme) {
+      navbar.classList.remove('navbar-light', 'bg-light');
+      navbar.classList.add('navbar-dark', 'bg-dark');
+    } else {
+      navbar.classList.remove('navbar-dark', 'bg-dark');
+      navbar.classList.add('navbar-light', 'bg-light');
+    }
+  }
+  
+  // Update footer classes
+  const footer = document.querySelector('.footer');
+  if (footer) {
+    if (isDarkTheme) {
+      footer.classList.remove('bg-light');
+      footer.classList.add('bg-dark');
+    } else {
+      footer.classList.remove('bg-dark');
+      footer.classList.add('bg-light');
+    }
   }
   
   // Sync with global app state if it exists
   if (typeof app !== 'undefined') {
-    app.darkMode = themeSettings.currentTheme === 'dark';
+    app.darkMode = isDarkTheme;
   }
   
   // Dispatch a custom event for components that need to react to theme changes
@@ -115,11 +141,63 @@ function applyTheme() {
 
 /**
  * Toggle between dark and light themes
+ * @param {Event} event - Optional click or change event
  */
-function toggleTheme() {
-  const newTheme = themeSettings.currentTheme === 'dark' ? 'light' : 'dark';
-  setTheme(newTheme);
+function toggleTheme(event) {
+  if (event && event.target && event.target.type === 'checkbox') {
+    // If triggered by checkbox, use its checked state
+    const newTheme = event.target.checked ? 'dark' : 'light';
+    setTheme(newTheme);
+  } else {
+    // Otherwise just toggle the current theme
+    const newTheme = themeSettings.currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+  }
 }
 
 // Initialize when the DOM is ready
 document.addEventListener('DOMContentLoaded', initializeTheme);
+
+// Execute this immediately to prevent flash of unstyled content (FOUC)
+(function() {
+  // Get theme from localStorage
+  const savedTheme = localStorage.getItem('resticly_theme');
+  const theme = savedTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  
+  // Apply theme to body immediately
+  document.body.setAttribute('data-bs-theme', theme);
+
+  // Set theme setting for later use
+  if (typeof themeSettings !== 'undefined') {
+    themeSettings.currentTheme = theme;
+  }
+  
+  // We need to wait for the DOM to be ready to modify navbar and footer
+  document.addEventListener('DOMContentLoaded', function() {
+    const isDarkTheme = theme === 'dark';
+    
+    // Update navbar classes
+    const navbar = document.querySelector('.navbar');
+    if (navbar) {
+      if (isDarkTheme) {
+        navbar.classList.remove('navbar-light', 'bg-light');
+        navbar.classList.add('navbar-dark', 'bg-dark');
+      } else {
+        navbar.classList.remove('navbar-dark', 'bg-dark');
+        navbar.classList.add('navbar-light', 'bg-light');
+      }
+    }
+    
+    // Update footer classes
+    const footer = document.querySelector('.footer');
+    if (footer) {
+      if (isDarkTheme) {
+        footer.classList.remove('bg-light');
+        footer.classList.add('bg-dark');
+      } else {
+        footer.classList.remove('bg-dark');
+        footer.classList.add('bg-light');
+      }
+    }
+  });
+})();
