@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="200px" height="200px" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Resticly Logo</title>
+    <defs>
+        <linearGradient x1="0%" y1="0%" x2="100%" y2="100%" id="gradient">
+            <stop stop-color="#4a90e2" offset="0%"></stop>
+            <stop stop-color="#8e44ad" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- Outer Circle -->
+        <circle cx="100" cy="100" r="90" stroke="url(#gradient)" stroke-width="4" fill="none"></circle>
+        
+        <!-- Lock Body -->
+        <rect x="65" y="90" width="70" height="60" rx="8" fill="url(#gradient)"></rect>
+        
+        <!-- Lock Shackle -->
+        <path d="M75,90 L75,60 C75,44 125,44 125,60 L125,90" stroke="url(#gradient)" stroke-width="12" stroke-linecap="round" fill="none"></path>
+        
+        <!-- Database Symbol -->
+        <ellipse cx="100" cy="105" rx="20" ry="8" fill="#ffffff"></ellipse>
+        <path d="M80,105 L80,125 C80,131 120,131 120,125 L120,105" stroke="#ffffff" stroke-width="2" fill="none"></path>
+        <ellipse cx="100" cy="125" rx="20" ry="8" fill="#ffffff" opacity="0.5"></ellipse>
+        
+        <!-- Text -->
+        <text x="100" y="170" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#ffffff">Resticly</text>
+    </g>
+</svg>
