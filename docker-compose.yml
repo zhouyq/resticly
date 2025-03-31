@@ -24,7 +24,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
       - DATABASE_URL=postgresql://resticly:resticly@db/resticly
       - SESSION_SECRET=change_this_to_a_secure_random_string
