@@ -53,90 +53,104 @@ def run_backup_task(task_id):
     Args:
         task_id (int): ID of the scheduled task
     """
-    from models import ScheduledTask, Repository, Backup
-    from app import db
+    from app import app, db
+    from models import ScheduledTask, Repository, Backup, Snapshot
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker, scoped_session
     import json
     
     logger.info(f"Starting scheduled backup task {task_id}")
     
-    try:
-        # Get task details
-        task = ScheduledTask.query.get(task_id)
-        if not task:
-            logger.error(f"Scheduled task {task_id} not found")
-            return
+    # 使用应用上下文
+    with app.app_context():
+        # 创建一个新的会话，确保线程安全
+        engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+        session_factory = sessionmaker(bind=engine)
+        Session = scoped_session(session_factory)
+        session = Session()
         
-        # Update last run time
-        task.last_run = datetime.utcnow()
-        db.session.commit()
-        
-        # Get repository
-        repository = Repository.query.get(task.repository_id)
-        if not repository:
-            logger.error(f"Repository {task.repository_id} not found")
-            return
-        
-        # Create backup record
-        backup = Backup(
-            repository_id=repository.id,
-            source_path=task.source_path,
-            status='running'
-        )
-        db.session.add(backup)
-        db.session.commit()
-        
-        # Run the backup with appropriate repository type
-        if repository.repo_type == 'rest-server':
-            restic = ResticWrapper(
-                repository.location, 
-                repository.password, 
-                repo_type='rest-server',
-                rest_user=repository.rest_user,
-                rest_pass=repository.rest_pass
-            )
-        else:
-            restic = ResticWrapper(
-                repository.location, 
-                repository.password, 
-                repo_type=repository.repo_type
-            )
-        tags = json.loads(task.tags) if task.tags else []
-        success, result = restic.create_backup(task.source_path, tags)
-        
-        # Update backup record
-        backup.end_time = datetime.utcnow()
-        backup.status = 'completed' if success else 'failed'
-        backup.message = result.get('message', '')
-        
-        if success:
-            backup.files_new = result.get('files_new', 0)
-            backup.files_changed = result.get('files_changed', 0)
-            backup.bytes_added = result.get('bytes_added', 0)
-            backup.snapshot_id = result.get('snapshot_id', '')
-            
-            # Also add to snapshots table if we have a snapshot ID
-            if backup.snapshot_id:
-                from models import Snapshot
-                
-                snapshot = Snapshot(
-                    repository_id=repository.id,
-                    snapshot_id=backup.snapshot_id,
-                    created_at=backup.end_time,
-                    hostname=result.get('hostname', ''),
-                    paths=json.dumps([task.source_path]),
-                    size=result.get('bytes_added', 0)
-                )
-                db.session.add(snapshot)
-        
-        db.session.commit()
-        logger.info(f"Completed scheduled backup task {task_id}: {backup.status}")
-    
-    except Exception as e:
-        logger.error(f"Error running scheduled backup task {task_id}: {str(e)}")
         try:
-            db.session.rollback()
-        except:
-            pass
+            # 获取任务详情
+            task = session.query(ScheduledTask).get(task_id)
+            if not task:
+                logger.error(f"Scheduled task {task_id} not found")
+                return
+            
+            # 更新最后运行时间
+            task.last_run = datetime.utcnow()
+            session.commit()
+            
+            # 获取仓库
+            repository = session.query(Repository).get(task.repository_id)
+            if not repository:
+                logger.error(f"Repository {task.repository_id} not found")
+                return
+            
+            # 创建备份记录
+            backup = Backup(
+                repository_id=repository.id,
+                source_path=task.source_path,
+                status='running'
+            )
+            session.add(backup)
+            session.commit()
+            
+            # 使用适当的仓库类型运行备份
+            if repository.repo_type == 'rest-server':
+                restic = ResticWrapper(
+                    repository.location, 
+                    repository.password, 
+                    repo_type='rest-server',
+                    rest_user=repository.rest_user,
+                    rest_pass=repository.rest_pass
+                )
+            else:
+                restic = ResticWrapper(
+                    repository.location, 
+                    repository.password, 
+                    repo_type=repository.repo_type
+                )
+            
+            # 处理标签
+            tags = json.loads(task.tags) if task.tags else []
+            success, result = restic.create_backup(task.source_path, tags)
+            
+            # 更新备份记录
+            backup.end_time = datetime.utcnow()
+            backup.status = 'completed' if success else 'failed'
+            backup.message = result.get('message', '')
+            
+            if success:
+                backup.files_new = result.get('files_new', 0)
+                backup.files_changed = result.get('files_changed', 0)
+                backup.bytes_added = result.get('bytes_added', 0)
+                backup.snapshot_id = result.get('snapshot_id', '')
+                
+                # 如果有快照ID，也添加到快照表
+                if backup.snapshot_id:
+                    snapshot = Snapshot(
+                        repository_id=repository.id,
+                        snapshot_id=backup.snapshot_id,
+                        created_at=backup.end_time,
+                        hostname=result.get('hostname', ''),
+                        paths=json.dumps([task.source_path]),
+                        size=result.get('bytes_added', 0)
+                    )
+                    session.add(snapshot)
+            
+            session.commit()
+            logger.info(f"Completed scheduled backup task {task_id}: {backup.status}")
+        
+        except Exception as e:
+            logger.error(f"Error running scheduled backup task {task_id}: {str(e)}")
+            try:
+                session.rollback()
+            except Exception as rollback_error:
+                logger.error(f"Error rolling back session: {str(rollback_error)}")
+        finally:
+            # 清理会话
+            session.close()
+            Session.remove()
 
 def schedule_backup_task(task):
     """

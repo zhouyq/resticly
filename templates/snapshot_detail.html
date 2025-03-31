@@ -1,0 +1,175 @@
+{% extends "layout.html" %}
+
+{% block title %}快照详情 - {{ snapshot.short_id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/snapshots">快照</a></li>
+            <li class="breadcrumb-item active">{{ snapshot.short_id }}</li>
+        </ol>
+    </nav>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">快照详情</h5>
+            <button class="btn btn-sm btn-primary" id="refreshFilesList">刷新文件列表</button>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>基本信息</h6>
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <th>快照 ID</th>
+                                <td><code>{{ snapshot.snapshot_id }}</code></td>
+                            </tr>
+                            <tr>
+                                <th>仓库</th>
+                                <td>{{ snapshot.repository.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>创建时间</th>
+                                <td>{{ snapshot.created_at }}</td>
+                            </tr>
+                            <tr>
+                                <th>主机名</th>
+                                <td>{{ snapshot.hostname }}</td>
+                            </tr>
+                            <tr>
+                                <th>大小</th>
+                                <td id="snapshot-size">{{ snapshot.size|filesizeformat }}</td>
+                            </tr>
+                            <tr>
+                                <th>路径</th>
+                                <td>
+                                    <ul class="list-unstyled mb-0">
+                                        {% for path in paths %}
+                                        <li><code>{{ path }}</code></li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>标签</th>
+                                <td>
+                                    {% for tag in tags %}
+                                    <span class="badge bg-secondary">{{ tag }}</span>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6>操作</h6>
+                    <div class="d-flex gap-2 mb-3">
+                        <button class="btn btn-primary" id="restoreButton">恢复快照</button>
+                        <button class="btn btn-danger" id="forgetButton">删除快照</button>
+                    </div>
+                    
+                    <h6>快照状态</h6>
+                    <div class="progress mb-3" style="height: 20px;">
+                        <div class="progress-bar" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">确保</div>
+                    </div>
+                </div>
+            </div>
+
+            <h6 class="mt-4">文件列表</h6>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover" id="filesTable">
+                    <thead>
+                        <tr>
+                            <th>路径</th>
+                            <th>大小</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filesTableBody">
+                        <tr>
+                            <td colspan="3" class="text-center">加载文件列表...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 恢复快照模态框 -->
+    <div class="modal fade" id="restoreModal" tabindex="-1" aria-labelledby="restoreModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="restoreModalLabel">恢复快照</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="restoreForm">
+                        <div class="mb-3">
+                            <label for="targetPath" class="form-label">恢复目标路径</label>
+                            <input type="text" class="form-control" id="targetPath" required>
+                            <div class="form-text">快照内容将被恢复到此路径</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">恢复选项</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="overwriteExisting">
+                                <label class="form-check-label" for="overwriteExisting">
+                                    覆盖现有文件
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="includePaths" class="form-label">包含路径（可选）</label>
+                            <textarea class="form-control" id="includePaths" rows="3" placeholder="每行一个路径，留空恢复所有文件"></textarea>
+                            <div class="form-text">指定要恢复的特定文件或目录路径</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="confirmRestore">恢复</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除快照确认模态框 -->
+    <div class="modal fade" id="forgetModal" tabindex="-1" aria-labelledby="forgetModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="forgetModalLabel">删除快照</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>您确定要删除此快照吗？此操作不可逆。</p>
+                    <p><strong>快照 ID:</strong> <code>{{ snapshot.snapshot_id }}</code></p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="pruneAfterForget">
+                        <label class="form-check-label" for="pruneAfterForget">
+                            删除后清理存储（移除未引用的数据）
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirmForget">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/snapshot_detail.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initSnapshotDetailPage('{{ snapshot.snapshot_id }}', {{ snapshot.repository_id }});
+    });
+</script>
+{% endblock %}
