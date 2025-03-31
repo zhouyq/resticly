@@ -38,7 +38,7 @@ migrate.init_app(app, db)
 # Import routes to register them with the app
 import routes
 
-# Initialize database tables (only for initial setup, migrations will handle changes)
+# Initialize database tables
 with app.app_context():
     db.create_all()
 

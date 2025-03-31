@@ -1,0 +1,41 @@
+INFO:apscheduler.scheduler:Scheduler started
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+INFO:scheduler:Scheduler started
+INFO:scheduler:Loaded 0 scheduled tasks
+INFO:apscheduler.scheduler:Scheduler has been shut down
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+INFO:apscheduler.scheduler:Scheduler started
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+INFO:scheduler:Scheduler started
+INFO:scheduler:Loaded 0 scheduled tasks
+INFO:apscheduler.scheduler:Scheduler has been shut down
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+INFO:apscheduler.scheduler:Scheduler started
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+INFO:scheduler:Scheduler started
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+INFO:scheduler:Loaded 0 scheduled tasks
+INFO:apscheduler.scheduler:Scheduler has been shut down
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+INFO:apscheduler.scheduler:Scheduler started
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+INFO:scheduler:Scheduler started
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+INFO:scheduler:Loaded 0 scheduled tasks
+INFO:apscheduler.scheduler:Scheduler has been shut down
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+ERROR:routes:Error fetching repositories: (psycopg2.errors.UndefinedColumn) column repository.rest_user does not exist
+LINE 1: ...tion, repository.password AS repository_password, repository...
+                                                             ^
+
+[SQL: SELECT repository.id AS repository_id, repository.name AS repository_name, repository.repo_type AS repository_repo_type, repository.location AS repository_location, repository.password AS repository_password, repository.rest_user AS repository_rest_user, repository.rest_pass AS repository_rest_pass, repository.created_at AS repository_created_at, repository.last_check AS repository_last_check, repository.status AS repository_status
+FROM repository]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+ERROR:routes:Error loading dashboard: (psycopg2.errors.UndefinedColumn) column repository.rest_user does not exist
+LINE 1: ...tion, repository.password AS repository_password, repository...
