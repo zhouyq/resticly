@@ -15,6 +15,10 @@ if [ -d "migrations/versions" ] && [ "$(ls -A migrations/versions)" ]; then
   # 如果已有迁移文件，直接应用迁移
   echo "Applying existing migrations..."
   python manage.py db_upgrade
+  
+  # 检查数据库表结构，确保所有必需的列都存在
+  echo "Verifying database schema..."
+  python db_migrate.py
 else
   # 如果没有迁移文件，初始化迁移仓库并创建初始迁移
   echo "Initializing migration repository..."

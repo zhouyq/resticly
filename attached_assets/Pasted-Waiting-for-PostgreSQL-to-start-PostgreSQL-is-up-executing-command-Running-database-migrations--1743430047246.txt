@@ -1,0 +1,165 @@
+Waiting for PostgreSQL to start...
+PostgreSQL is up - executing command
+Running database migrations...
+Applying existing migrations...
+INFO:apscheduler.scheduler:Scheduler started
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+INFO:scheduler:Scheduler started
+INFO:scheduler:Loaded 0 scheduled tasks
+INFO:apscheduler.scheduler:Scheduler has been shut down
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+Database has been upgraded.
+[2025-03-31 14:04:30 +0000] [1] [INFO] Starting gunicorn 23.0.0
+[2025-03-31 14:04:30 +0000] [1] [INFO] Listening at: http://0.0.0.0:5000 (1)
+[2025-03-31 14:04:30 +0000] [1] [INFO] Using worker: sync
+[2025-03-31 14:04:30 +0000] [13] [INFO] Booting worker with pid: 13
+[2025-03-31 14:04:30 +0000] [14] [INFO] Booting worker with pid: 14
+[2025-03-31 14:04:30 +0000] [15] [INFO] Booting worker with pid: 15
+[2025-03-31 14:04:30 +0000] [16] [INFO] Booting worker with pid: 16
+INFO:apscheduler.scheduler:Scheduler started
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+INFO:scheduler:Scheduler started
+INFO:scheduler:Loaded 0 scheduled tasks
+INFO:apscheduler.scheduler:Scheduler has been shut down
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+INFO:apscheduler.scheduler:Scheduler started
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+INFO:scheduler:Scheduler started
+INFO:scheduler:Loaded 0 scheduled tasks
+INFO:apscheduler.scheduler:Scheduler has been shut down
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+INFO:apscheduler.scheduler:Scheduler started
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+INFO:scheduler:Scheduler started
+INFO:scheduler:Loaded 0 scheduled tasks
+INFO:apscheduler.scheduler:Scheduler has been shut down
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+INFO:apscheduler.scheduler:Scheduler started
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+INFO:scheduler:Scheduler started
+INFO:scheduler:Loaded 0 scheduled tasks
+INFO:apscheduler.scheduler:Scheduler has been shut down
+DEBUG:apscheduler.scheduler:Looking for jobs to run
+DEBUG:apscheduler.scheduler:No jobs; waiting until a job is added
+ERROR:routes:Error loading dashboard: (psycopg2.errors.UndefinedColumn) column repository.rest_user does not exist
+LINE 1: ...tion, repository.password AS repository_password, repository...
+                                                             ^
+
+[SQL: SELECT repository.id AS repository_id, repository.name AS repository_name, repository.repo_type AS repository_repo_type, repository.location AS repository_location, repository.password AS repository_password, repository.rest_user AS repository_rest_user, repository.rest_pass AS repository_rest_pass, repository.created_at AS repository_created_at, repository.last_check AS repository_last_check, repository.status AS repository_status
+FROM repository]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+ERROR:routes:Error fetching repositories: (psycopg2.errors.UndefinedColumn) column repository.rest_user does not exist
+LINE 1: ...tion, repository.password AS repository_password, repository...
+                                                             ^
+
+[SQL: SELECT repository.id AS repository_id, repository.name AS repository_name, repository.repo_type AS repository_repo_type, repository.location AS repository_location, repository.password AS repository_password, repository.rest_user AS repository_rest_user, repository.rest_pass AS repository_rest_pass, repository.created_at AS repository_created_at, repository.last_check AS repository_last_check, repository.status AS repository_status
+FROM repository]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+ERROR:routes:Error fetching repositories: (psycopg2.errors.UndefinedColumn) column repository.rest_user does not exist
+LINE 1: ...tion, repository.password AS repository_password, repository...
+                                                             ^
+
+[SQL: SELECT repository.id AS repository_id, repository.name AS repository_name, repository.repo_type AS repository_repo_type, repository.location AS repository_location, repository.password AS repository_password, repository.rest_user AS repository_rest_user, repository.rest_pass AS repository_rest_pass, repository.created_at AS repository_created_at, repository.last_check AS repository_last_check, repository.status AS repository_status
+FROM repository]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+ERROR:app:Exception on /repositories [GET]
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1964, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 945, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column repository.rest_user does not exist
+LINE 1: ...tion, repository.password AS repository_password, repository...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/routes.py", line 52, in repositories
+    repositories = Repository.query.all()
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2704, in all
+    return self._iter().all()  # type: ignore
+           ^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2858, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1416, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 523, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1638, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1843, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1983, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2352, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1964, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 945, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column repository.rest_user does not exist
+LINE 1: ...tion, repository.password AS repository_password, repository...
+                                                             ^
+
+[SQL: SELECT repository.id AS repository_id, repository.name AS repository_name, repository.repo_type AS repository_repo_type, repository.location AS repository_location, repository.password AS repository_password, repository.rest_user AS repository_rest_user, repository.rest_pass AS repository_rest_pass, repository.created_at AS repository_created_at, repository.last_check AS repository_last_check, repository.status AS repository_status
+FROM repository]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+ERROR:routes:Error fetching repositories: (psycopg2.errors.UndefinedColumn) column repository.rest_user does not exist
+LINE 1: ...tion, repository.password AS repository_password, repository...
+                                                             ^
+
+[SQL: SELECT repository.id AS repository_id, repository.name AS repository_name, repository.repo_type AS repository_repo_type, repository.location AS repository_location, repository.password AS repository_password, repository.rest_user AS repository_rest_user, repository.rest_pass AS repository_rest_pass, repository.created_at AS repository_created_at, repository.last_check AS repository_last_check, repository.status AS repository_status
+FROM repository]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+ERROR:routes:Error loading dashboard: (psycopg2.errors.UndefinedColumn) column repository.rest_user does not exist
+LINE 1: ...tion, repository.password AS repository_password, repository...
+                                                             ^
+
+[SQL: SELECT repository.id AS repository_id, repository.name AS repository_name, repository.repo_type AS repository_repo_type, repository.location AS repository_location, repository.password AS repository_password, repository.rest_user AS repository_rest_user, repository.rest_pass AS repository_rest_pass, repository.created_at AS repository_created_at, repository.last_check AS repository_last_check, repository.status AS repository_status
+FROM repository]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+ERROR:routes:Error fetching repositories: (psycopg2.errors.UndefinedColumn) column repository.rest_user does not exist
+LINE 1: ...tion, repository.password AS repository_password, repository...
+                                                             ^
+
+[SQL: SELECT repository.id AS repository_id, repository.name AS repository_name, repository.repo_type AS repository_repo_type, repository.location AS repository_location, repository.password AS repository_password, repository.rest_user AS repository_rest_user, repository.rest_pass AS repository_rest_pass, repository.created_at AS repository_created_at, repository.last_check AS repository_last_check, repository.status AS repository_status
+FROM repository]
+(Background on this error at: https://sqlalche.me/e/20/f405)
