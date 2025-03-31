@@ -103,19 +103,36 @@
 
 /* Navigation text color adjustments */
 [data-bs-theme="light"] .navbar {
-  --bs-navbar-color: rgba(0, 0, 0, 0.65);
-  --bs-navbar-hover-color: rgba(0, 0, 0, 0.8);
-  --bs-navbar-active-color: rgba(0, 0, 0, 0.9);
+  --bs-navbar-color: rgba(0, 0, 0, 0.8);
+  --bs-navbar-hover-color: rgba(0, 0, 0, 0.9);
+  --bs-navbar-active-color: rgba(0, 0, 0, 1);
 }
 
 [data-bs-theme="light"] .navbar-brand,
 [data-bs-theme="light"] .navbar-nav .nav-link {
-  color: rgba(0, 0, 0, 0.8);
+  color: rgba(0, 0, 0, 0.9);
 }
 
 [data-bs-theme="light"] .navbar-nav .nav-link.active {
   color: rgba(0, 0, 0, 1);
-  font-weight: 500;
+  font-weight: 700;
+}
+
+/* Dark mode navbar needs better contrast */
+[data-bs-theme="dark"] .navbar {
+  --bs-navbar-color: rgba(255, 255, 255, 0.8);
+  --bs-navbar-hover-color: rgba(255, 255, 255, 0.95);
+  --bs-navbar-active-color: rgba(255, 255, 255, 1);
+}
+
+[data-bs-theme="dark"] .navbar-brand,
+[data-bs-theme="dark"] .navbar-nav .nav-link {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+[data-bs-theme="dark"] .navbar-nav .nav-link.active {
+  color: rgba(255, 255, 255, 1);
+  font-weight: 700;
 }
 
 /* Ensure form inputs have good contrast in light mode */

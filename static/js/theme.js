@@ -88,6 +88,9 @@ function setTheme(theme) {
   }
 }
 
+// Make setTheme available globally
+window.setTheme = setTheme;
+
 /**
  * Apply the current theme to the document
  */
@@ -103,28 +106,16 @@ function applyTheme() {
     themeIcon.className = isDarkTheme ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
   }
   
-  // Update navbar classes
+  // Update navbar classes - we're now using bg-body-tertiary with data-bs-theme
   const navbar = document.querySelector('.navbar');
   if (navbar) {
-    if (isDarkTheme) {
-      navbar.classList.remove('navbar-light', 'bg-light');
-      navbar.classList.add('navbar-dark', 'bg-dark');
-    } else {
-      navbar.classList.remove('navbar-dark', 'bg-dark');
-      navbar.classList.add('navbar-light', 'bg-light');
-    }
+    navbar.classList.add('bg-body-tertiary');
   }
   
-  // Update footer classes
+  // Update footer classes - we're now using bg-body-tertiary with data-bs-theme
   const footer = document.querySelector('.footer');
   if (footer) {
-    if (isDarkTheme) {
-      footer.classList.remove('bg-light');
-      footer.classList.add('bg-dark');
-    } else {
-      footer.classList.remove('bg-dark');
-      footer.classList.add('bg-light');
-    }
+    footer.classList.add('bg-body-tertiary');
   }
   
   // Sync with global app state if it exists
@@ -155,6 +146,9 @@ function toggleTheme(event) {
   }
 }
 
+// Make toggleTheme available globally
+window.toggleTheme = toggleTheme;
+
 // Initialize when the DOM is ready
 document.addEventListener('DOMContentLoaded', initializeTheme);
 
@@ -176,28 +170,16 @@ document.addEventListener('DOMContentLoaded', initializeTheme);
   document.addEventListener('DOMContentLoaded', function() {
     const isDarkTheme = theme === 'dark';
     
-    // Update navbar classes
+    // Update navbar classes - we're now using bg-body-tertiary with data-bs-theme
     const navbar = document.querySelector('.navbar');
     if (navbar) {
-      if (isDarkTheme) {
-        navbar.classList.remove('navbar-light', 'bg-light');
-        navbar.classList.add('navbar-dark', 'bg-dark');
-      } else {
-        navbar.classList.remove('navbar-dark', 'bg-dark');
-        navbar.classList.add('navbar-light', 'bg-light');
-      }
+      navbar.classList.add('bg-body-tertiary');
     }
     
-    // Update footer classes
+    // Update footer classes - we're now using bg-body-tertiary with data-bs-theme
     const footer = document.querySelector('.footer');
     if (footer) {
-      if (isDarkTheme) {
-        footer.classList.remove('bg-light');
-        footer.classList.add('bg-dark');
-      } else {
-        footer.classList.remove('bg-dark');
-        footer.classList.add('bg-light');
-      }
+      footer.classList.add('bg-body-tertiary');
     }
   });
 })();

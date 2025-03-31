@@ -3,11 +3,6 @@
  * Contains global functionality used across the application
  */
 
-// Global theme settings used by theme.js
-const themeSettings = {
-  currentTheme: 'dark'  // Default theme
-};
-
 // Global application state
 const app = {
   currentLanguage: 'en',
