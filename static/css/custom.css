@@ -360,3 +360,10 @@ body {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* Smooth theme transitions */
+body, .navbar, .footer, .card, .main-content, .form-control, .form-select, 
+button, a, .list-group-item, .badge, .alert, .modal-content, .dropdown-menu,
+.table, th, td, .sidebar, .theme-toggle-wrapper, .toast, table, input {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+}

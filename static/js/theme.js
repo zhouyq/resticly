@@ -97,7 +97,7 @@ window.setTheme = setTheme;
 function applyTheme() {
   const isDarkTheme = themeSettings.currentTheme === 'dark';
   
-  // Set the document theme
+  // Set the document theme - this is the main Bootstrap theme attribute
   document.body.setAttribute('data-bs-theme', themeSettings.currentTheme);
   
   // Update theme toggle icon if it exists
@@ -106,17 +106,56 @@ function applyTheme() {
     themeIcon.className = isDarkTheme ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
   }
   
-  // Update navbar classes - we're now using bg-body-tertiary with data-bs-theme
+  // Update the body background color
+  document.body.style.backgroundColor = isDarkTheme ? '#121212' : '#ffffff';
+  document.body.style.color = isDarkTheme ? '#e6e6e6' : '#333333';
+  
+  // Update main content background
+  const mainContent = document.querySelector('.main-content');
+  if (mainContent) {
+    mainContent.style.backgroundColor = isDarkTheme ? '#1e1e1e' : '#f8f9fa';
+  }
+  
+  // Update navbar classes
   const navbar = document.querySelector('.navbar');
   if (navbar) {
     navbar.classList.add('bg-body-tertiary');
+    // Add additional custom background colors for better contrast
+    navbar.style.backgroundColor = isDarkTheme ? '#212529' : '#f8f9fa';
   }
   
-  // Update footer classes - we're now using bg-body-tertiary with data-bs-theme
+  // Update footer classes
   const footer = document.querySelector('.footer');
   if (footer) {
     footer.classList.add('bg-body-tertiary');
+    // Add additional custom background colors for better contrast
+    footer.style.backgroundColor = isDarkTheme ? '#212529' : '#f8f9fa';
   }
+  
+  // Update card backgrounds
+  const cards = document.querySelectorAll('.card');
+  cards.forEach(card => {
+    card.style.backgroundColor = isDarkTheme ? '#2d2d2d' : '#ffffff';
+    if (isDarkTheme) {
+      card.style.borderColor = '#444';
+    } else {
+      card.style.borderColor = '#dee2e6';
+    }
+  });
+  
+  // Update inputs
+  const inputs = document.querySelectorAll('.form-control, .form-select');
+  inputs.forEach(input => {
+    if (isDarkTheme) {
+      input.style.backgroundColor = '#262626';
+      input.style.borderColor = '#495057';
+      input.style.color = '#e6e6e6';
+    } else {
+      input.style.backgroundColor = '#ffffff';
+      input.style.borderColor = '#ced4da';
+      input.style.color = '#333333';
+    }
+  });
   
   // Sync with global app state if it exists
   if (typeof app !== 'undefined') {
@@ -160,26 +199,71 @@ document.addEventListener('DOMContentLoaded', initializeTheme);
   
   // Apply theme to body immediately
   document.body.setAttribute('data-bs-theme', theme);
+  
+  // Update theme icon immediately
+  const themeIcon = document.getElementById('themeIcon');
+  if (themeIcon) {
+    themeIcon.className = theme === 'dark' ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
+  }
 
   // Set theme setting for later use
   if (typeof themeSettings !== 'undefined') {
     themeSettings.currentTheme = theme;
   }
   
-  // We need to wait for the DOM to be ready to modify navbar and footer
+  // We need to wait for the DOM to be ready to modify elements
   document.addEventListener('DOMContentLoaded', function() {
     const isDarkTheme = theme === 'dark';
     
-    // Update navbar classes - we're now using bg-body-tertiary with data-bs-theme
+    // Update the body background color
+    document.body.style.backgroundColor = isDarkTheme ? '#121212' : '#ffffff';
+    document.body.style.color = isDarkTheme ? '#e6e6e6' : '#333333';
+    
+    // Update main content background
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      mainContent.style.backgroundColor = isDarkTheme ? '#1e1e1e' : '#f8f9fa';
+    }
+    
+    // Update navbar classes
     const navbar = document.querySelector('.navbar');
     if (navbar) {
       navbar.classList.add('bg-body-tertiary');
+      // Add additional custom background colors for better contrast
+      navbar.style.backgroundColor = isDarkTheme ? '#212529' : '#f8f9fa';
     }
     
-    // Update footer classes - we're now using bg-body-tertiary with data-bs-theme
+    // Update footer classes
     const footer = document.querySelector('.footer');
     if (footer) {
       footer.classList.add('bg-body-tertiary');
+      // Add additional custom background colors for better contrast
+      footer.style.backgroundColor = isDarkTheme ? '#212529' : '#f8f9fa';
     }
+    
+    // Update card backgrounds
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+      card.style.backgroundColor = isDarkTheme ? '#2d2d2d' : '#ffffff';
+      if (isDarkTheme) {
+        card.style.borderColor = '#444';
+      } else {
+        card.style.borderColor = '#dee2e6';
+      }
+    });
+    
+    // Update inputs
+    const inputs = document.querySelectorAll('.form-control, .form-select');
+    inputs.forEach(input => {
+      if (isDarkTheme) {
+        input.style.backgroundColor = '#262626';
+        input.style.borderColor = '#495057';
+        input.style.color = '#e6e6e6';
+      } else {
+        input.style.backgroundColor = '#ffffff';
+        input.style.borderColor = '#ced4da';
+        input.style.color = '#333333';
+      }
+    });
   });
 })();
