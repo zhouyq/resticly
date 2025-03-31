@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # PostgreSQL数据库服务
+  db:
+    image: postgres:14-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_PASSWORD=resticly
+      - POSTGRES_USER=resticly
+      - POSTGRES_DB=resticly
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U resticly"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Resticly应用服务
+  web:
+    build: .
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://resticly:resticly@db/resticly
+      - SESSION_SECRET=change_this_to_a_secure_random_string
+    volumes:
+      # 用于持久化备份数据（可根据需要修改）
+      - restic_data:/backup
+      # 挂载需要备份的源文件（可选，根据需要修改）
+      - ~/documents:/source/documents:ro
+
+volumes:
+  postgres_data:
+  restic_data:

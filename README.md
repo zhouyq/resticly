@@ -88,7 +88,16 @@ Resticly is a web-based management tool for [Restic](https://restic.net/), a fas
 
 ### Docker Installation
 
-You can also run Resticly using Docker:
+You can quickly deploy Resticly using Docker and docker-compose:
+
+```bash
+# Start with docker-compose (includes PostgreSQL database)
+docker-compose up -d
+
+# Access at http://localhost:5000
+```
+
+You can also run Resticly using Docker alone (need to provide your own database):
 
 ```bash
 # Build the Docker image
@@ -98,9 +107,12 @@ docker build -t resticly .
 docker run -p 5000:5000 \
   -e DATABASE_URL="postgresql://user:password@host/resticly" \
   -e SESSION_SECRET="your-secret-key" \
-  -v /path/to/restic:/usr/bin/restic \
   resticly
 ```
+
+Notes:
+- When using docker-compose, modify the `SESSION_SECRET` in `docker-compose.yml` to a secure random string
+- Volume mounts can be adjusted in `docker-compose.yml` according to your needs
 
 ## Deployment
 
@@ -197,7 +209,16 @@ Resticly 是一个基于 Web 的 [Restic](https://restic.net/) 管理工具，Re
 
 ### Docker 安装
 
-您也可以使用 Docker 运行 Resticly：
+您可以使用 Docker 和 docker-compose 快速部署 Resticly：
+
+```bash
+# 使用 docker-compose 启动（包含 PostgreSQL 数据库）
+docker-compose up -d
+
+# 访问 http://localhost:5000
+```
+
+也可以单独使用 Docker 运行 Resticly（需要自行提供数据库）：
 
 ```bash
 # 构建 Docker 镜像
@@ -207,9 +228,12 @@ docker build -t resticly .
 docker run -p 5000:5000 \
   -e DATABASE_URL="postgresql://user:password@host/resticly" \
   -e SESSION_SECRET="your-secret-key" \
-  -v /path/to/restic:/usr/bin/restic \
   resticly
 ```
+
+注意：
+- 使用 docker-compose 时，请修改 `docker-compose.yml` 中的 `SESSION_SECRET` 为安全的随机字符串
+- 配置卷挂载可以根据您的需求在 `docker-compose.yml` 中调整
 
 ## 生产环境部署
 
