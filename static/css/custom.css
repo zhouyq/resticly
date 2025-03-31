@@ -1,0 +1,194 @@
+/**
+ * Custom styles for Resticly
+ */
+
+/* Basic layout adjustments */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+}
+
+/* Sidebar adjustments */
+.sidebar {
+  min-width: 200px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 1000;
+  padding-top: 56px;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: -100%;
+    transition: left 0.3s ease;
+    height: 100%;
+    overflow-y: auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .sidebar.active {
+    left: 0;
+  }
+}
+
+/* Navbar adjustments */
+.navbar-brand img {
+  margin-right: 10px;
+}
+
+/* Card adjustments */
+.card {
+  margin-bottom: 20px;
+  border-radius: 0.5rem;
+}
+
+.card-header {
+  font-weight: 500;
+}
+
+/* Dashboard widgets */
+.dashboard-widget {
+  height: 100%;
+}
+
+.dashboard-widget .list-group-item {
+  border-left: none;
+  border-right: none;
+}
+
+.dashboard-widget .list-group-item:first-child {
+  border-top: none;
+}
+
+.dashboard-widget .list-group-item:last-child {
+  border-bottom: none;
+}
+
+.dashboard-stats .stats-item {
+  text-align: center;
+  padding: 15px;
+  border-radius: 0.5rem;
+  margin-bottom: 20px;
+}
+
+.dashboard-stats .stats-value {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.dashboard-stats .stats-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Chart containers */
+.chart-container {
+  position: relative;
+  height: 200px;
+  width: 100%;
+}
+
+/* Loading indicator */
+#loadingIndicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Toast container */
+.toast-container {
+  z-index: 1500;
+}
+
+/* Theme toggle switch */
+.theme-toggle-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.theme-toggle-wrapper i {
+  margin-right: 10px;
+}
+
+/* Table adjustments */
+.table th {
+  font-weight: 600;
+}
+
+/* Form adjustments */
+.form-control:focus {
+  box-shadow: none;
+}
+
+/* Badge adjustments */
+.badge {
+  font-weight: 500;
+  font-size: 0.75rem;
+  padding: 0.3em 0.6em;
+}
+
+/* Logo and branding */
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Terminal-like output */
+.terminal-output {
+  background-color: var(--bs-dark);
+  color: var(--bs-light);
+  padding: 15px;
+  font-family: monospace;
+  border-radius: 0.5rem;
+  height: 300px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+/* Language selector */
+.language-selector {
+  margin-left: 15px;
+}
+
+/* Repository and backup source paths */
+.source-path {
+  word-break: break-all;
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+/* Responsive tables */
+@media (max-width: 992px) {
+  .table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Smooth page transitions */
+.fade-transition {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

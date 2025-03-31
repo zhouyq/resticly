@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Page Title -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0" data-i18n="scheduler_title">Scheduler</h1>
+        <button class="btn btn-primary" id="newTaskButton">
+            <i class="bi bi-plus-lg me-1"></i>
+            <span data-i18n="scheduler_new">New Task</span>
+        </button>
+    </div>
+
+    <!-- Scheduled Tasks Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0" data-i18n="scheduler_manage">Manage Scheduled Tasks</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th data-i18n="scheduler_name">Task Name</th>
+                            <th data-i18n="scheduler_repository">Repository</th>
+                            <th data-i18n="scheduler_source">Source Path</th>
+                            <th data-i18n="scheduler_schedule">Schedule</th>
+                            <th data-i18n="scheduler_next_run">Next Run</th>
+                            <th data-i18n="scheduler_enabled">Enabled</th>
+                            <th data-i18n="scheduler_actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schedulerTableBody">
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span class="ms-2">Loading scheduled tasks...</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Task Modal -->
+<div class="modal fade" id="newTaskModal" tabindex="-1" aria-labelledby="newTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newTaskModalLabel" data-i18n="task_add_title">Create Scheduled Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newTaskForm">
+                    <div class="mb-3">
+                        <label for="taskName" class="form-label" data-i18n="task_add_name">Task Name</label>
+                        <input type="text" class="form-control" id="taskName" data-i18n-placeholder="task_add_name_placeholder" placeholder="Enter task name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskRepository" class="form-label" data-i18n="task_add_repository">Repository</label>
+                        <select class="form-select" id="taskRepository" required>
+                            <option value="" data-i18n="task_add_repository_placeholder">Select repository</option>
+                            <!-- Options will be loaded dynamically -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskSourcePath" class="form-label" data-i18n="task_add_source">Source Path</label>
+                        <input type="text" class="form-control" id="taskSourcePath" data-i18n-placeholder="task_add_source_placeholder" placeholder="Enter source path to backup" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="scheduleType" class="form-label" data-i18n="task_add_schedule_type">Schedule Type</label>
+                        <select class="form-select" id="scheduleType" required>
+                            <option value="">Select schedule type</option>
+                            <option value="cron">Cron Expression</option>
+                            <option value="interval">Interval</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="cronExpressionGroup" style="display: none;">
+                        <label for="cronExpression" class="form-label" data-i18n="task_add_schedule_cron">Cron Expression</label>
+                        <input type="text" class="form-control" id="cronExpression" data-i18n-placeholder="task_add_schedule_cron_placeholder" placeholder="Enter cron expression (e.g. 0 0 * * *)">
+                        <div class="form-text">
+                            <i class="bi bi-info-circle"></i>
+                            Format: <code>minute hour day-of-month month day-of-week</code>
+                        </div>
+                    </div>
+                    <div class="mb-3" id="intervalSecondsGroup" style="display: none;">
+                        <label class="form-label" data-i18n="task_add_schedule_interval">Interval</label>
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="intervalHours" min="0" value="0">
+                                    <span class="input-group-text" data-i18n="task_add_schedule_interval_hours">Hours</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="intervalMinutes" min="0" value="0">
+                                    <span class="input-group-text" data-i18n="task_add_schedule_interval_minutes">Minutes</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal" data-i18n="task_add_cancel">Cancel</button>
+                        <button type="submit" class="btn btn-primary" data-i18n="task_add_submit">Create Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

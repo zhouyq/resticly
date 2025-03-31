@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Page Title -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0" data-i18n="backups_title">Backups</h1>
+        <button class="btn btn-primary" id="newBackupButton">
+            <i class="bi bi-plus-lg me-1"></i>
+            <span data-i18n="backups_new">New Backup</span>
+        </button>
+    </div>
+
+    <!-- Backups Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0" data-i18n="backups_manage">Manage Backups</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th data-i18n="backups_repository">Repository</th>
+                            <th data-i18n="backups_source">Source Path</th>
+                            <th data-i18n="backups_started">Started</th>
+                            <th data-i18n="backups_finished">Finished</th>
+                            <th data-i18n="backups_status">Status</th>
+                            <th data-i18n="backups_details">Details</th>
+                            <th data-i18n="backups_actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="backupsTableBody">
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span class="ms-2">Loading backups...</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Backup Modal -->
+<div class="modal fade" id="newBackupModal" tabindex="-1" aria-labelledby="newBackupModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newBackupModalLabel" data-i18n="backup_add_title">Create Backup</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newBackupForm">
+                    <div class="mb-3">
+                        <label for="backupRepository" class="form-label" data-i18n="backup_add_repository">Repository</label>
+                        <select class="form-select" id="backupRepository" required>
+                            <option value="" data-i18n="backup_add_repository_placeholder">Select repository</option>
+                            <!-- Options will be loaded dynamically -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="backupSourcePath" class="form-label" data-i18n="backup_add_source">Source Path</label>
+                        <input type="text" class="form-control" id="backupSourcePath" data-i18n-placeholder="backup_add_source_placeholder" placeholder="Enter source path to backup" required>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle"></i>
+                            Example: <code>/home/user/documents</code>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal" data-i18n="backup_add_cancel">Cancel</button>
+                        <button type="submit" class="btn btn-primary" data-i18n="backup_add_submit">Start Backup</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

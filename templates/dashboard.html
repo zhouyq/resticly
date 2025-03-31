@@ -1,0 +1,208 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Page Title -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0" data-i18n="dashboard_title">Dashboard</h1>
+        <button class="btn btn-sm btn-outline-primary" onclick="fetchDashboardData()">
+            <i class="bi bi-arrow-clockwise me-1"></i>
+            <span data-i18n="action_refresh">Refresh</span>
+        </button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row dashboard-stats mb-4">
+        <!-- Total Repositories -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary bg-opacity-10 border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-archive fs-1 text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="stats-value text-primary" id="repoCount">0</div>
+                            <div class="stats-label text-primary" data-i18n="dashboard_total_repos">Total Repositories</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Total Backups -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success bg-opacity-10 border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-save fs-1 text-success"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="stats-value text-success" id="backupCount">0</div>
+                            <div class="stats-label text-success" data-i18n="dashboard_total_backups">Total Backups</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Total Snapshots -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info bg-opacity-10 border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-camera fs-1 text-info"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="stats-value text-info" id="snapshotCount">0</div>
+                            <div class="stats-label text-info" data-i18n="dashboard_total_snapshots">Total Snapshots</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scheduled Tasks -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning bg-opacity-10 border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-calendar-check fs-1 text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="stats-value text-warning" id="scheduledCount">0</div>
+                            <div class="stats-label text-warning" data-i18n="dashboard_scheduled_tasks">Scheduled Tasks</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Backup Status Row -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0" data-i18n="dashboard_recent_backups">Recent Backups</h5>
+                    <a href="/backups" class="btn btn-sm btn-outline-primary">
+                        <span data-i18n="action_view">View</span>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="p-2 rounded-circle bg-primary bg-opacity-10 me-2">
+                                        <i class="bi bi-play-fill text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="small text-muted" data-i18n="dashboard_running_backups">Running</div>
+                                        <div class="fw-bold" id="runningBackups">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="p-2 rounded-circle bg-success bg-opacity-10 me-2">
+                                        <i class="bi bi-check-lg text-success"></i>
+                                    </div>
+                                    <div>
+                                        <div class="small text-muted" data-i18n="dashboard_completed_backups">Completed</div>
+                                        <div class="fw-bold" id="completedBackups">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="p-2 rounded-circle bg-danger bg-opacity-10 me-2">
+                                        <i class="bi bi-x-lg text-danger"></i>
+                                    </div>
+                                    <div>
+                                        <div class="small text-muted" data-i18n="dashboard_failed_backups">Failed</div>
+                                        <div class="fw-bold" id="failedBackups">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="list-group list-group-flush" id="backupList">
+                        <div class="text-center text-muted py-3">
+                            <i class="bi bi-hourglass me-2"></i>
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0" data-i18n="dashboard_backup_status">Backup Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="backupStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Second Row -->
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card h-100 shadow-sm" id="repositoriesWidget">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0" data-i18n="dashboard_repositories">Repositories</h5>
+                    <a href="/repositories" class="btn btn-sm btn-outline-primary">
+                        <span data-i18n="action_view">View</span>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush" id="repoList">
+                        <div class="text-center text-muted py-3">
+                            <i class="bi bi-hourglass me-2"></i>
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100 shadow-sm" id="scheduledTasksWidget">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0" data-i18n="dashboard_scheduled_tasks">Scheduled Tasks</h5>
+                    <a href="/scheduler" class="btn btn-sm btn-outline-primary">
+                        <span data-i18n="action_view">View</span>
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush" id="scheduledTasksList">
+                        <div class="text-center text-muted py-3">
+                            <i class="bi bi-hourglass me-2"></i>
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0" data-i18n="dashboard_backup_size">Backup Size</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="backupSizeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

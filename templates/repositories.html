@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Page Title -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0" data-i18n="repositories_title">Repositories</h1>
+        <button class="btn btn-primary" id="newRepositoryButton">
+            <i class="bi bi-plus-lg me-1"></i>
+            <span data-i18n="repositories_new">New Repository</span>
+        </button>
+    </div>
+
+    <!-- Repositories Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0" data-i18n="repositories_manage">Manage Repositories</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th data-i18n="repositories_name">Name</th>
+                            <th data-i18n="repositories_location">Location</th>
+                            <th data-i18n="repositories_created">Created</th>
+                            <th data-i18n="repositories_last_check">Last Check</th>
+                            <th data-i18n="repositories_status">Status</th>
+                            <th data-i18n="repositories_actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="repositoriesTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span class="ms-2">Loading repositories...</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Repository Modal -->
+<div class="modal fade" id="newRepositoryModal" tabindex="-1" aria-labelledby="newRepositoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newRepositoryModalLabel" data-i18n="repository_add_title">Add Repository</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newRepositoryForm">
+                    <div class="mb-3">
+                        <label for="repositoryName" class="form-label" data-i18n="repository_add_name">Repository Name</label>
+                        <input type="text" class="form-control" id="repositoryName" data-i18n-placeholder="repository_add_name_placeholder" placeholder="Enter repository name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="repositoryLocation" class="form-label" data-i18n="repository_add_location">Repository Location</label>
+                        <input type="text" class="form-control" id="repositoryLocation" data-i18n-placeholder="repository_add_location_placeholder" placeholder="Enter repository path or URL" required>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle"></i>
+                            Example: <code>/path/to/repo</code> or <code>s3:bucket-name:/path</code>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="repositoryPassword" class="form-label" data-i18n="repository_add_password">Repository Password</label>
+                        <input type="password" class="form-control" id="repositoryPassword" data-i18n-placeholder="repository_add_password_placeholder" placeholder="Enter repository password" required>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal" data-i18n="repository_add_cancel">Cancel</button>
+                        <button type="submit" class="btn btn-primary" data-i18n="repository_add_submit">Create Repository</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

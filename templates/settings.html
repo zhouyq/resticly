@@ -1,0 +1,185 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Page Title -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0" data-i18n="settings_title">Settings</h1>
+    </div>
+
+    <!-- General Settings Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0" data-i18n="settings_general">General Settings</h5>
+        </div>
+        <div class="card-body">
+            <form id="generalSettingsForm">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="languageSelect" class="form-label" data-i18n="settings_language">Language</label>
+                        <select class="form-select" id="languageSelect">
+                            <option value="en" data-i18n="language_en">English</option>
+                            <option value="zh" data-i18n="language_zh">中文</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="themeSelect" class="form-label" data-i18n="settings_theme">Theme</label>
+                        <select class="form-select" id="themeSelect">
+                            <option value="dark" data-i18n="theme_dark">Dark</option>
+                            <option value="light" data-i18n="theme_light">Light</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary" data-i18n="settings_save">Save Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Settings Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0" data-i18n="settings_application">Application Settings</h5>
+        </div>
+        <div class="card-body">
+            <form id="appSettingsForm">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="enableNotifications" checked>
+                            <label class="form-check-label" for="enableNotifications">
+                                Enable Notifications
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="autoRefresh" checked>
+                            <label class="form-check-label" for="autoRefresh">
+                                Auto-refresh Dashboard
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="refreshInterval" class="form-label">Refresh Interval (seconds)</label>
+                        <input type="number" class="form-control" id="refreshInterval" min="10" value="30">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="maxBackupHistoryItems" class="form-label">Max Backup History Items</label>
+                        <input type="number" class="form-control" id="maxBackupHistoryItems" min="5" value="100">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary" data-i18n="settings_save">Save Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- About Card -->
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="card-title mb-0">About Resticly</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+                <div class="flex-shrink-0">
+                    <i class="bi bi-archive-fill fs-1 text-primary"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h3 class="mb-0" data-i18n="app_title">Resticly</h3>
+                    <p class="mb-0" data-i18n="app_subtitle">Manage Restic, Effortlessly</p>
+                </div>
+            </div>
+            <p>
+                Resticly is a web-based management tool for <a href="https://restic.net/" target="_blank">Restic</a>, 
+                an open-source backup program. It provides a simple interface for managing repositories, 
+                backups, snapshots, and scheduled tasks.
+            </p>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Features:</h6>
+                    <ul>
+                        <li>Repository management</li>
+                        <li>Backup operations</li>
+                        <li>Snapshot browsing</li>
+                        <li>Scheduled backups</li>
+                        <li>Dashboard with statistics</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>Technologies:</h6>
+                    <ul>
+                        <li>Flask (Backend)</li>
+                        <li>Bootstrap 5 (Frontend)</li>
+                        <li>Chart.js (Visualization)</li>
+                        <li>SQLAlchemy (Database)</li>
+                        <li>APScheduler (Task Scheduling)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize settings form
+        const languageSelect = document.getElementById('languageSelect');
+        const themeSelect = document.getElementById('themeSelect');
+        
+        if (languageSelect) {
+            languageSelect.value = localStorage.getItem('resticly_language') || 'en';
+            languageSelect.addEventListener('change', (e) => {
+                changeLanguage(e.target.value);
+            });
+        }
+        
+        if (themeSelect) {
+            themeSelect.value = localStorage.getItem('resticly_theme') || 'dark';
+            themeSelect.addEventListener('change', (e) => {
+                setTheme(e.target.value);
+            });
+        }
+        
+        // Save general settings
+        const generalSettingsForm = document.getElementById('generalSettingsForm');
+        if (generalSettingsForm) {
+            generalSettingsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                localStorage.setItem('resticly_language', languageSelect.value);
+                localStorage.setItem('resticly_theme', themeSelect.value);
+                
+                changeLanguage(languageSelect.value);
+                setTheme(themeSelect.value);
+                
+                showToast('Settings saved successfully', 'success');
+            });
+        }
+        
+        // Save application settings
+        const appSettingsForm = document.getElementById('appSettingsForm');
+        if (appSettingsForm) {
+            appSettingsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const enableNotifications = document.getElementById('enableNotifications').checked;
+                const autoRefresh = document.getElementById('autoRefresh').checked;
+                const refreshInterval = document.getElementById('refreshInterval').value;
+                const maxBackupHistoryItems = document.getElementById('maxBackupHistoryItems').value;
+                
+                localStorage.setItem('resticly_notifications', enableNotifications ? 'true' : 'false');
+                localStorage.setItem('resticly_autoRefresh', autoRefresh ? 'true' : 'false');
+                localStorage.setItem('resticly_refreshInterval', refreshInterval);
+                localStorage.setItem('resticly_maxBackupHistoryItems', maxBackupHistoryItems);
+                
+                showToast('Settings saved successfully', 'success');
+            });
+        }
+    });
+</script>
+{% endblock %}

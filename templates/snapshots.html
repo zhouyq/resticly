@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Page Title -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0" data-i18n="snapshots_title">Snapshots</h1>
+        <button class="btn btn-primary" id="syncSnapshots">
+            <i class="bi bi-arrow-repeat me-1"></i>
+            <span data-i18n="snapshots_sync">Sync Snapshots</span>
+        </button>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="repositorySelector" class="form-label" data-i18n="snapshots_filter">Filter by Repository</label>
+                    <select class="form-select" id="repositorySelector">
+                        <option value="">All Repositories</option>
+                        <!-- Options will be loaded dynamically -->
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Snapshots Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0" data-i18n="snapshots_manage">Manage Snapshots</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th data-i18n="snapshots_repository">Repository</th>
+                            <th data-i18n="snapshots_hostname">Hostname</th>
+                            <th data-i18n="snapshots_created">Created</th>
+                            <th data-i18n="snapshots_size">Size</th>
+                            <th data-i18n="snapshots_paths">Paths</th>
+                            <th data-i18n="snapshots_actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="snapshotsTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span class="ms-2">Loading snapshots...</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Snapshot Details Modal -->
+<div class="modal fade" id="snapshotDetailsModal" tabindex="-1" aria-labelledby="snapshotDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="snapshotDetailsModalLabel" data-i18n="snapshots_details">Snapshot Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Details will be populated dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="action_close">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

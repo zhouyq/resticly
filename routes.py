@@ -1,0 +1,621 @@
+import json
+import logging
+from datetime import datetime
+from flask import render_template, request, redirect, url_for, jsonify, flash, abort
+from sqlalchemy.exc import SQLAlchemyError
+
+from app import app, db
+from models import Repository, Backup, Snapshot, ScheduledTask, Settings
+from restic_wrapper import ResticWrapper
+from scheduler import scheduler, schedule_backup_task
+
+logger = logging.getLogger(__name__)
+
+# Dashboard route
+@app.route('/')
+def dashboard():
+    """Main dashboard page"""
+    try:
+        repositories = Repository.query.all()
+        recent_backups = Backup.query.order_by(Backup.start_time.desc()).limit(5).all()
+        
+        # Count statistics
+        repo_count = Repository.query.count()
+        backup_count = Backup.query.count()
+        snapshot_count = Snapshot.query.count()
+        scheduled_count = ScheduledTask.query.count()
+        
+        # Count backups by status
+        running_backups = Backup.query.filter_by(status='running').count()
+        completed_backups = Backup.query.filter_by(status='completed').count()
+        failed_backups = Backup.query.filter_by(status='failed').count()
+        
+        return render_template('dashboard.html', 
+                               repositories=repositories,
+                               recent_backups=recent_backups,
+                               repo_count=repo_count,
+                               backup_count=backup_count,
+                               snapshot_count=snapshot_count,
+                               scheduled_count=scheduled_count,
+                               running_backups=running_backups,
+                               completed_backups=completed_backups,
+                               failed_backups=failed_backups)
+    except Exception as e:
+        logger.error(f"Error loading dashboard: {str(e)}")
+        flash(f"Error loading dashboard: {str(e)}", "danger")
+        return render_template('dashboard.html')
+
+# Repository routes
+@app.route('/repositories')
+def repositories():
+    """Repository management page"""
+    repositories = Repository.query.all()
+    return render_template('repositories.html', repositories=repositories)
+
+@app.route('/api/repositories', methods=['GET'])
+def get_repositories():
+    """API endpoint to get all repositories"""
+    try:
+        repositories = Repository.query.all()
+        return jsonify([{
+            'id': repo.id,
+            'name': repo.name,
+            'location': repo.location,
+            'created_at': repo.created_at.isoformat(),
+            'last_check': repo.last_check.isoformat() if repo.last_check else None,
+            'status': repo.status
+        } for repo in repositories])
+    except Exception as e:
+        logger.error(f"Error fetching repositories: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/repositories', methods=['POST'])
+def create_repository():
+    """API endpoint to create a new repository"""
+    try:
+        data = request.json
+        
+        # Validate required fields
+        required_fields = ['name', 'location', 'password']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        # Check if repository with this name already exists
+        existing = Repository.query.filter_by(name=data['name']).first()
+        if existing:
+            return jsonify({'error': 'Repository with this name already exists'}), 400
+        
+        # Initialize repository using Restic
+        restic = ResticWrapper(data['location'], data['password'])
+        success, message = restic.init_repository()
+        
+        if not success:
+            return jsonify({'error': f'Failed to initialize repository: {message}'}), 400
+        
+        # Create repository in database
+        repository = Repository(
+            name=data['name'],
+            location=data['location'],
+            password=data['password'],
+            status='ok',
+            last_check=datetime.utcnow()
+        )
+        
+        db.session.add(repository)
+        db.session.commit()
+        
+        return jsonify({
+            'id': repository.id,
+            'name': repository.name,
+            'location': repository.location,
+            'created_at': repository.created_at.isoformat(),
+            'status': repository.status
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error creating repository: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/repositories/<int:repo_id>', methods=['GET'])
+def get_repository(repo_id):
+    """API endpoint to get repository details"""
+    try:
+        repository = Repository.query.get(repo_id)
+        if not repository:
+            return jsonify({'error': 'Repository not found'}), 404
+        
+        return jsonify({
+            'id': repository.id,
+            'name': repository.name,
+            'location': repository.location,
+            'created_at': repository.created_at.isoformat(),
+            'last_check': repository.last_check.isoformat() if repository.last_check else None,
+            'status': repository.status
+        })
+    except Exception as e:
+        logger.error(f"Error fetching repository: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/repositories/<int:repo_id>/check', methods=['POST'])
+def check_repository(repo_id):
+    """API endpoint to check repository health"""
+    try:
+        repository = Repository.query.get(repo_id)
+        if not repository:
+            return jsonify({'error': 'Repository not found'}), 404
+        
+        restic = ResticWrapper(repository.location, repository.password)
+        success, message = restic.check_repository()
+        
+        repository.last_check = datetime.utcnow()
+        repository.status = 'ok' if success else 'error'
+        db.session.commit()
+        
+        return jsonify({
+            'status': repository.status,
+            'message': message,
+            'last_check': repository.last_check.isoformat()
+        })
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error checking repository: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/repositories/<int:repo_id>', methods=['DELETE'])
+def delete_repository(repo_id):
+    """API endpoint to delete a repository"""
+    try:
+        repository = Repository.query.get(repo_id)
+        if not repository:
+            return jsonify({'error': 'Repository not found'}), 404
+        
+        db.session.delete(repository)
+        db.session.commit()
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting repository: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+# Backup routes
+@app.route('/backups')
+def backups():
+    """Backup management page"""
+    backups = Backup.query.order_by(Backup.start_time.desc()).all()
+    repositories = Repository.query.all()
+    return render_template('backups.html', backups=backups, repositories=repositories)
+
+@app.route('/api/backups', methods=['GET'])
+def get_backups():
+    """API endpoint to get all backups"""
+    try:
+        backups = Backup.query.order_by(Backup.start_time.desc()).all()
+        return jsonify([{
+            'id': backup.id,
+            'repository_id': backup.repository_id,
+            'repository_name': backup.repository.name,
+            'source_path': backup.source_path,
+            'start_time': backup.start_time.isoformat(),
+            'end_time': backup.end_time.isoformat() if backup.end_time else None,
+            'status': backup.status,
+            'message': backup.message,
+            'files_new': backup.files_new,
+            'files_changed': backup.files_changed,
+            'bytes_added': backup.bytes_added,
+            'snapshot_id': backup.snapshot_id
+        } for backup in backups])
+    except Exception as e:
+        logger.error(f"Error fetching backups: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/backups', methods=['POST'])
+def create_backup():
+    """API endpoint to create a new backup"""
+    try:
+        data = request.json
+        
+        # Validate required fields
+        required_fields = ['repository_id', 'source_path']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        # Check if repository exists
+        repository = Repository.query.get(data['repository_id'])
+        if not repository:
+            return jsonify({'error': 'Repository not found'}), 404
+        
+        # Create backup record
+        backup = Backup(
+            repository_id=data['repository_id'],
+            source_path=data['source_path'],
+            status='running'
+        )
+        
+        db.session.add(backup)
+        db.session.commit()
+        
+        # Start backup in a separate thread
+        from threading import Thread
+        def run_backup():
+            try:
+                restic = ResticWrapper(repository.location, repository.password)
+                success, result = restic.create_backup(data['source_path'])
+                
+                backup.end_time = datetime.utcnow()
+                backup.status = 'completed' if success else 'failed'
+                backup.message = result.get('message', '')
+                
+                if success:
+                    backup.files_new = result.get('files_new', 0)
+                    backup.files_changed = result.get('files_changed', 0)
+                    backup.bytes_added = result.get('bytes_added', 0)
+                    backup.snapshot_id = result.get('snapshot_id', '')
+                    
+                    # Also add to snapshots table
+                    if backup.snapshot_id:
+                        snapshot = Snapshot(
+                            repository_id=repository.id,
+                            snapshot_id=backup.snapshot_id,
+                            created_at=backup.end_time,
+                            hostname=result.get('hostname', ''),
+                            paths=json.dumps([data['source_path']]),
+                            size=result.get('bytes_added', 0)
+                        )
+                        db.session.add(snapshot)
+                
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                logger.error(f"Error during backup process: {str(e)}")
+                
+                # Update backup record with error
+                backup = Backup.query.get(backup.id)
+                if backup:
+                    backup.status = 'failed'
+                    backup.end_time = datetime.utcnow()
+                    backup.message = str(e)
+                    db.session.commit()
+        
+        Thread(target=run_backup).start()
+        
+        return jsonify({
+            'id': backup.id,
+            'repository_id': backup.repository_id,
+            'source_path': backup.source_path,
+            'start_time': backup.start_time.isoformat(),
+            'status': backup.status
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error creating backup: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/backups/<int:backup_id>', methods=['GET'])
+def get_backup(backup_id):
+    """API endpoint to get backup details"""
+    try:
+        backup = Backup.query.get(backup_id)
+        if not backup:
+            return jsonify({'error': 'Backup not found'}), 404
+        
+        return jsonify({
+            'id': backup.id,
+            'repository_id': backup.repository_id,
+            'repository_name': backup.repository.name,
+            'source_path': backup.source_path,
+            'start_time': backup.start_time.isoformat(),
+            'end_time': backup.end_time.isoformat() if backup.end_time else None,
+            'status': backup.status,
+            'message': backup.message,
+            'files_new': backup.files_new,
+            'files_changed': backup.files_changed,
+            'bytes_added': backup.bytes_added,
+            'snapshot_id': backup.snapshot_id
+        })
+    except Exception as e:
+        logger.error(f"Error fetching backup: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+# Snapshot routes
+@app.route('/snapshots')
+def snapshots():
+    """Snapshot management page"""
+    snapshots = Snapshot.query.order_by(Snapshot.created_at.desc()).all()
+    repositories = Repository.query.all()
+    return render_template('snapshots.html', snapshots=snapshots, repositories=repositories)
+
+@app.route('/api/snapshots', methods=['GET'])
+def get_snapshots():
+    """API endpoint to get all snapshots"""
+    try:
+        repo_id = request.args.get('repository_id')
+        query = Snapshot.query
+        
+        if repo_id:
+            query = query.filter_by(repository_id=repo_id)
+        
+        snapshots = query.order_by(Snapshot.created_at.desc()).all()
+        
+        return jsonify([{
+            'id': snapshot.id,
+            'repository_id': snapshot.repository_id,
+            'repository_name': snapshot.repository.name,
+            'snapshot_id': snapshot.snapshot_id,
+            'created_at': snapshot.created_at.isoformat(),
+            'hostname': snapshot.hostname,
+            'paths': json.loads(snapshot.paths) if snapshot.paths else [],
+            'tags': json.loads(snapshot.tags) if snapshot.tags else [],
+            'size': snapshot.size
+        } for snapshot in snapshots])
+    except Exception as e:
+        logger.error(f"Error fetching snapshots: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/repositories/<int:repo_id>/snapshots/sync', methods=['POST'])
+def sync_snapshots(repo_id):
+    """API endpoint to sync snapshots from repository"""
+    try:
+        repository = Repository.query.get(repo_id)
+        if not repository:
+            return jsonify({'error': 'Repository not found'}), 404
+        
+        restic = ResticWrapper(repository.location, repository.password)
+        success, snapshots_data = restic.list_snapshots()
+        
+        if not success:
+            return jsonify({'error': 'Failed to list snapshots'}), 500
+        
+        # Clear existing snapshots for this repository
+        Snapshot.query.filter_by(repository_id=repo_id).delete()
+        
+        # Add new snapshots
+        for snapshot_data in snapshots_data:
+            snapshot = Snapshot(
+                repository_id=repo_id,
+                snapshot_id=snapshot_data.get('id', ''),
+                created_at=datetime.fromisoformat(snapshot_data.get('time', '').replace('Z', '+00:00')),
+                hostname=snapshot_data.get('hostname', ''),
+                paths=json.dumps(snapshot_data.get('paths', [])),
+                tags=json.dumps(snapshot_data.get('tags', [])),
+                size=snapshot_data.get('size', 0)
+            )
+            db.session.add(snapshot)
+        
+        db.session.commit()
+        
+        return jsonify({'success': True, 'count': len(snapshots_data)})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error syncing snapshots: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+# Scheduler routes
+@app.route('/scheduler')
+def scheduler_page():
+    """Scheduled tasks management page"""
+    tasks = ScheduledTask.query.all()
+    repositories = Repository.query.all()
+    return render_template('scheduler.html', tasks=tasks, repositories=repositories)
+
+@app.route('/api/scheduled-tasks', methods=['GET'])
+def get_scheduled_tasks():
+    """API endpoint to get all scheduled tasks"""
+    try:
+        tasks = ScheduledTask.query.all()
+        return jsonify([{
+            'id': task.id,
+            'repository_id': task.repository_id,
+            'repository_name': task.repository.name,
+            'name': task.name,
+            'source_path': task.source_path,
+            'schedule_type': task.schedule_type,
+            'cron_expression': task.cron_expression,
+            'interval_seconds': task.interval_seconds,
+            'enabled': task.enabled,
+            'last_run': task.last_run.isoformat() if task.last_run else None,
+            'next_run': task.next_run.isoformat() if task.next_run else None,
+            'created_at': task.created_at.isoformat(),
+            'tags': json.loads(task.tags) if task.tags else []
+        } for task in tasks])
+    except Exception as e:
+        logger.error(f"Error fetching scheduled tasks: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/scheduled-tasks', methods=['POST'])
+def create_scheduled_task():
+    """API endpoint to create a new scheduled task"""
+    try:
+        data = request.json
+        
+        # Validate required fields
+        required_fields = ['repository_id', 'name', 'source_path', 'schedule_type']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        # Check if repository exists
+        repository = Repository.query.get(data['repository_id'])
+        if not repository:
+            return jsonify({'error': 'Repository not found'}), 404
+        
+        # Validate schedule type specific fields
+        if data['schedule_type'] == 'cron':
+            if not data.get('cron_expression'):
+                return jsonify({'error': 'Missing cron_expression for cron schedule type'}), 400
+        elif data['schedule_type'] == 'interval':
+            if not data.get('interval_seconds'):
+                return jsonify({'error': 'Missing interval_seconds for interval schedule type'}), 400
+        else:
+            return jsonify({'error': 'Invalid schedule_type. Must be "cron" or "interval"'}), 400
+        
+        # Create scheduled task
+        task = ScheduledTask(
+            repository_id=data['repository_id'],
+            name=data['name'],
+            source_path=data['source_path'],
+            schedule_type=data['schedule_type'],
+            cron_expression=data.get('cron_expression'),
+            interval_seconds=data.get('interval_seconds'),
+            enabled=data.get('enabled', True),
+            tags=json.dumps(data.get('tags', []))
+        )
+        
+        db.session.add(task)
+        db.session.commit()
+        
+        # Schedule the task
+        next_run = schedule_backup_task(task)
+        if next_run:
+            task.next_run = next_run
+            db.session.commit()
+        
+        return jsonify({
+            'id': task.id,
+            'repository_id': task.repository_id,
+            'name': task.name,
+            'schedule_type': task.schedule_type,
+            'enabled': task.enabled,
+            'next_run': task.next_run.isoformat() if task.next_run else None
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error creating scheduled task: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/scheduled-tasks/<int:task_id>', methods=['PUT'])
+def update_scheduled_task(task_id):
+    """API endpoint to update a scheduled task"""
+    try:
+        task = ScheduledTask.query.get(task_id)
+        if not task:
+            return jsonify({'error': 'Scheduled task not found'}), 404
+        
+        data = request.json
+        
+        # Update fields
+        if 'enabled' in data:
+            task.enabled = data['enabled']
+        
+        if 'name' in data:
+            task.name = data['name']
+        
+        if 'source_path' in data:
+            task.source_path = data['source_path']
+        
+        if 'schedule_type' in data:
+            task.schedule_type = data['schedule_type']
+            
+            # Update related fields based on schedule type
+            if task.schedule_type == 'cron' and 'cron_expression' in data:
+                task.cron_expression = data['cron_expression']
+                task.interval_seconds = None
+            elif task.schedule_type == 'interval' and 'interval_seconds' in data:
+                task.interval_seconds = data['interval_seconds']
+                task.cron_expression = None
+        
+        if 'tags' in data:
+            task.tags = json.dumps(data['tags'])
+        
+        db.session.commit()
+        
+        # Reschedule the task
+        if task.enabled:
+            next_run = schedule_backup_task(task)
+            if next_run:
+                task.next_run = next_run
+                db.session.commit()
+        else:
+            # Remove from scheduler if disabled
+            try:
+                scheduler.remove_job(f'backup_task_{task.id}')
+                task.next_run = None
+                db.session.commit()
+            except:
+                pass
+        
+        return jsonify({
+            'id': task.id,
+            'repository_id': task.repository_id,
+            'name': task.name,
+            'schedule_type': task.schedule_type,
+            'enabled': task.enabled,
+            'next_run': task.next_run.isoformat() if task.next_run else None
+        })
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error updating scheduled task: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/scheduled-tasks/<int:task_id>', methods=['DELETE'])
+def delete_scheduled_task(task_id):
+    """API endpoint to delete a scheduled task"""
+    try:
+        task = ScheduledTask.query.get(task_id)
+        if not task:
+            return jsonify({'error': 'Scheduled task not found'}), 404
+        
+        # Remove from scheduler
+        try:
+            scheduler.remove_job(f'backup_task_{task.id}')
+        except:
+            pass
+        
+        db.session.delete(task)
+        db.session.commit()
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting scheduled task: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+# Settings routes
+@app.route('/settings')
+def settings():
+    """Settings page"""
+    settings = {setting.key: setting.value for setting in Settings.query.all()}
+    return render_template('settings.html', settings=settings)
+
+@app.route('/api/settings', methods=['GET'])
+def get_settings():
+    """API endpoint to get all settings"""
+    try:
+        settings = Settings.query.all()
+        return jsonify({setting.key: setting.value for setting in settings})
+    except Exception as e:
+        logger.error(f"Error fetching settings: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/settings', methods=['POST'])
+def update_settings():
+    """API endpoint to update settings"""
+    try:
+        data = request.json
+        
+        for key, value in data.items():
+            setting = Settings.query.filter_by(key=key).first()
+            if setting:
+                setting.value = value
+            else:
+                setting = Settings(key=key, value=value)
+                db.session.add(setting)
+        
+        db.session.commit()
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error updating settings: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+# Error handlers
+@app.errorhandler(404)
+def not_found(error):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def server_error(error):
+    return render_template('500.html'), 500
