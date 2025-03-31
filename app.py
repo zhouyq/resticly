@@ -2,6 +2,7 @@ import os
 import logging
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from sqlalchemy.orm import DeclarativeBase
 
 # Configure logging
@@ -11,6 +12,8 @@ class Base(DeclarativeBase):
     pass
 
 db = SQLAlchemy(model_class=Base)
+migrate = Migrate()
+
 # create the app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "resticly-default-secret")
@@ -23,16 +26,20 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
 }
 
-# initialize the app with the extension
+# initialize the app with the extensions
 db.init_app(app)
+
+# Import models here to avoid circular imports
+import models
+
+# Initialize Flask-Migrate
+migrate.init_app(app, db)
 
 # Import routes to register them with the app
 import routes
 
-# Initialize database tables
+# Initialize database tables (only for initial setup, migrations will handle changes)
 with app.app_context():
-    # Import models here to avoid circular imports
-    import models
     db.create_all()
 
 # Initialize scheduler outside app context to avoid issues with teardown

@@ -9,19 +9,20 @@ until PGPASSWORD=$POSTGRES_PASSWORD psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER"
 done
 echo "PostgreSQL is up - executing command"
 
-# 检查现有表，如果没有仓库表，创建所有表
-echo "Checking database tables..."
-if ! PGPASSWORD=$POSTGRES_PASSWORD psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT 1 FROM repository LIMIT 1" &>/dev/null; then
-  echo "Tables not found - creating database tables..."
-  python -c "from app import app, db; app.app_context().push(); db.create_all()"
+# 使用Flask-Migrate进行数据库迁移
+echo "Running database migrations..."
+if [ -d "migrations/versions" ] && [ "$(ls -A migrations/versions)" ]; then
+  # 如果已有迁移文件，直接应用迁移
+  echo "Applying existing migrations..."
+  python manage.py db_upgrade
 else
-  echo "Tables already exist - checking for missing columns..."
-  # 检查repo_type列是否存在
-  if ! PGPASSWORD=$POSTGRES_PASSWORD psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT repo_type FROM repository LIMIT 1" &>/dev/null; then
-    echo "repo_type column not found - adding column..."
-    PGPASSWORD=$POSTGRES_PASSWORD psql -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "ALTER TABLE repository ADD COLUMN IF NOT EXISTS repo_type VARCHAR(50) DEFAULT 'local'"
-  fi
-  # 可以在这里添加更多的列检查...
+  # 如果没有迁移文件，初始化迁移仓库并创建初始迁移
+  echo "Initializing migration repository..."
+  python manage.py db_init
+  echo "Creating initial migration..."
+  python manage.py db_migrate
+  echo "Applying initial migration..."
+  python manage.py db_upgrade
 fi
 
 # 执行传入的命令
